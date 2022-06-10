@@ -64,7 +64,7 @@ function getIntersections(conditions) {
     const { a: a2, b: b2, c: c2, i: i2 } = r2
     const y = (a * c2 - a2 * c) / (a * b2 - a2 * b)
     const x = (c - b * y) / a
-    if (i !== 0 || i2 !== 0) return { x, y, u: i + i2 }
+    if (i !== 0 || i2 !== 0) return { x, y, r1, r2 }
   })
 }
 

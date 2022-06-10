@@ -22,7 +22,7 @@ a que sea siempre X >= 0; Y >= 0; Dentro de este sub-plano se hallará la soluci
 - __Listo__ Cálculos 
 	- __Listo__ Emparejamiento de inecuaciones para hallar puntos de corte e intersecciones. 
 	- __Listo__ Validación ante restricciones y función objetivo de los puntos de corte e intersecciones halladas.
-	- __Pendiente__ Agrupación e identificación de puntos de corte con eje XY para graficación. 
+	- __Listo__ Agrupación e identificación de puntos de corte con eje XY para graficación. 
 
 - __Pendiente__ Graficación de funciones
 - __Pendiente__ Interface
