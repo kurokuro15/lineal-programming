@@ -57,11 +57,10 @@
                       <div class="input-group">
                         <input
                           class="form-control"
-                          type="number"
-                          step="0.01"
                           name="f-a"
                           id="f-a"
                           required
+                          pattern="\s*[-+]?(\(*\s*\d+([.,]\d+)?\s*\)*\s*([-+/*]\s*\(*\s*\d+([.,]\d+)?\s*\)*\s*)*)"
                         />
                         <span class="input-group-text">X</span>
                       </div>
@@ -73,11 +72,10 @@
                       <div class="input-group">
                         <input
                           class="form-control"
-                          type="number"
-                          step="0.01"
                           name="f-b"
                           id="f-b"
                           required
+                          pattern="\s*[-+]?(\(*\s*\d+([.,]\d+)?\s*\)*\s*([-+/*]\s*\(*\s*\d+([.,]\d+)?\s*\)*\s*)*)"
                         />
                         <span class="input-group-text">Y</span>
                       </div>

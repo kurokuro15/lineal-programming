@@ -1,5 +1,8 @@
 import { resolveProblem } from './index.js'
 
+const mathExpPattern =
+  '\\s*[-+]?(\\(*\\s*\\d+([.,]\\d+)?\\s*\\)*\\s*([-+/*]\\s*\\(*\\s*\\d+([.,]\\d+)?\\s*\\)*\\s*)*)'
+
 const form = document.querySelector('#problem-form')
 
 // procesar los datos del form al hacer submit
@@ -21,20 +24,22 @@ form.addEventListener('submit', (evt) => {
       case 'r':
         data.restrictions[propName[1]] = {
           ...data.restrictions[propName[1]],
-          [propName[2]]: Number(values[key])
+          [propName[2]]: Number(eval(values[key]))
         }
         break
       case 'f':
         data.objFn = {
           ...data.objFn,
-          [propName[1]]: Number(values[key])
+          [propName[1]]: Number(eval(values[key]))
         }
         break
       case 'optimization':
-        data.maximize = Boolean(Number(values[key]))
+        data.maximize = Number(values[key])
         break
     }
   })
+
+  console.log(data)
 
   const result = resolveProblem(data.objFn, data.restrictions, data.maximize)
 
@@ -46,7 +51,7 @@ form.addEventListener('submit', (evt) => {
 // agregar restricciones
 let restrictionCount = 0
 const container = document.querySelector('#restrictions-container')
-function addRestriction(removable = false) {
+function addRestriction (removable = false) {
   const restriction = document.createElement('div')
   restriction.className = 'row gx-2 align-items-center mb-3'
   restriction.innerHTML = `
@@ -56,10 +61,10 @@ function addRestriction(removable = false) {
       <div class="input-group">
         <input
           class="form-control"
-          type="number"
           name="r-${restrictionCount}-a"
           id="r-${restrictionCount}-a"
           required
+          pattern="${mathExpPattern}"
         />
         <span class="input-group-text">X</span>
       </div>
@@ -71,10 +76,10 @@ function addRestriction(removable = false) {
       <div class="input-group">
         <input
           class="form-control"
-          type="number"
           name="r-${restrictionCount}-b"
           id="r-${restrictionCount}-b"
           required
+          pattern="${mathExpPattern}"
         />
         <span class="input-group-text">Y</span>
       </div>
@@ -90,10 +95,10 @@ function addRestriction(removable = false) {
     <div class="col">
       <input
         class="form-control"
-        type="number"
         name="r-${restrictionCount}-c"
         id="r-${restrictionCount}-c"
         required
+        pattern="${mathExpPattern}"
       />
     </div>
 
