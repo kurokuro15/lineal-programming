@@ -14,7 +14,6 @@
     <script defer src="./canvas.js"></script>
     <script type="module" src="./form.js"></script>
   </head>
-
   <body>
     <div class="container my-3">
       <main class="mx-auto">
@@ -25,20 +24,15 @@
           Estudiantes: Reynaldo González (C.I. 26.576.198) | Yhan Montaño (C.I.
           29.784.799)
         </header>
-
         <hr />
-
         <div class="row row-cols-2">
           <div class="col">
             <form id="problem-form">
               <div class="row mb-3 align-items-center">
-                <label class="col-4 col-form-label fw-bold">
-                  Función objetivo:
-                </label>
+                <label class="col-4 col-form-label fw-bold"> Función objetivo: </label>
                 <div class="col">
                   <div class="row gx-2 align-items-center">
                     <div class="col-auto">Z(X,Y) =</div>
-
                     <div class="col">
                       <div class="input-group">
                         <input
@@ -51,9 +45,7 @@
                         <span class="input-group-text">X</span>
                       </div>
                     </div>
-
                     <div class="col-auto">+</div>
-
                     <div class="col">
                       <div class="input-group">
                         <input
@@ -69,7 +61,6 @@
                   </div>
                 </div>
               </div>
-
               <div class="row mb-3 align-items-center">
                 <label class="col-4 col-form-label fw-bold" for="optimization">
                   Tipo de optimización:
@@ -86,12 +77,9 @@
                   </select>
                 </div>
               </div>
-
               <label class="form-label fw-bold">Restricciones:</label>
               <div id="restrictions-container"></div>
-
               <hr />
-
               <div class="row justify-content-between">
                 <div class="col-auto">
                   <button
@@ -103,20 +91,17 @@
                   </button>
                 </div>
                 <div class="col-auto">
-                  <button
-                    type="submit"
-                    form="problem-form"
-                    class="btn btn-primary"
-                  >
+                  <button type="submit" form="problem-form" class="btn btn-primary">
                     Resolver
                   </button>
                 </div>
               </div>
             </form>
           </div>
-
           <div class="col">
-            <canvas id="graph"></canvas>
+            <div>
+              <canvas id="graph"></canvas>
+            </div>
           </div>
         </div>
       </main>

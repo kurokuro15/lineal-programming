@@ -6,7 +6,7 @@ const mathExpPattern =
 const form = document.querySelector('#problem-form')
 
 // procesar los datos del form al hacer submit
-form.addEventListener('submit', (evt) => {
+form.addEventListener('submit', evt => {
   evt.preventDefault()
 
   const values = Object.fromEntries(new FormData(form))
@@ -17,7 +17,7 @@ form.addEventListener('submit', (evt) => {
     maximize: null
   }
 
-  Object.keys(values).forEach((key) => {
+  Object.keys(values).forEach(key => {
     const propName = key.split('-')
 
     switch (propName[0]) {
@@ -43,15 +43,13 @@ form.addEventListener('submit', (evt) => {
 
   const result = resolveProblem(data.objFn, data.restrictions, data.maximize)
 
-  alert(
-    `La solución óptima es: x = ${result.x}, y = ${result.y} con z = ${result.z}`
-  )
+  alert(`La solución óptima es: x = ${result.x}, y = ${result.y} con z = ${result.z}`)
 })
 
 // agregar restricciones
 let restrictionCount = 0
 const container = document.querySelector('#restrictions-container')
-function addRestriction (removable = false) {
+function addRestriction(removable = false) {
   const restriction = document.createElement('div')
   restriction.className = 'row gx-2 align-items-center mb-3'
   restriction.innerHTML = `
@@ -130,7 +128,7 @@ function addRestriction (removable = false) {
   )
 
   // eliminar la row al hacer clic en el botón de eliminar restricción
-  deleteButton?.addEventListener('click', (evt) => {
+  deleteButton?.addEventListener('click', evt => {
     container.removeChild(evt.target.parentElement.parentElement)
     restrictionCount -= 1
   })
