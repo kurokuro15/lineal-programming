@@ -1,7 +1,7 @@
 const canvas = document.getElementById('graph');
 
-canvas.width = canvas.parentElement.clientWidth; // menos un pequeño margen a la derecha
-canvas.height = canvas.parentElement.clientHeight; // menos un pequeño margen a la derecha
+canvas.width = canvas.parentElement.clientWidth;
+canvas.height = canvas.parentElement.clientHeight;
 let hUnit = canvas.width / 45; // unidades horizontales (en lugar de 45 debería ser el valor de 'x' mas alto de los puntos de las restricciones + una holgura para dejar espacio en los bordes del gráfico)
 let vUnit = canvas.height / 90; // unidades verticales, aplica lo mismo de la de arriba
 let height = canvas.height - vUnit * 5; // - 5 unidades de holgura para tener espacio para las etiquetas y tal
