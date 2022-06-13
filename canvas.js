@@ -8,7 +8,8 @@ let height = canvas.height - vUnit * 5; // - 5 unidades de holgura para tener es
 let width = canvas.width;
 // actualizar las variables y redibujar el canvas al redimensionar la ventana
 window.addEventListener('resize', () => {
-  canvas.width = canvas.parentElement.width;
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
   hUnit = canvas.width / 45;
   vUnit = canvas.height / 90;
   height = canvas.height - vUnit * 5;
