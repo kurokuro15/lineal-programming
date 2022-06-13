@@ -43,7 +43,7 @@ function coorValidation (conditions, x, y) {
   const valid = []
   conditions.forEach((el) => {
     const { a, b, c, d } = el
-    const operation = a * x + b * y
+    const operation = fixDecimals(a * x + b * y)
     const equalities = {
       0: operation == c,
       1: operation >= c,
@@ -96,9 +96,13 @@ function resolveFnObjective (objFunction, conditions) {
     const { x, y } = coordinate
     const { a, b } = objFunction
     const z = a * x + b * y
-    if (coorValidation(conditions, x, y)) res.push({ x, y, z })
+    if (coorValidation(conditions, x, y)) res.push({ x: fixDecimals(x), y: fixDecimals(y), z: fixDecimals(z) })
   })
   return res
+}
+
+function fixDecimals(number) {
+  return Number(number.toFixed(4))
 }
 
 export function resolveProblem (objFn, restrictions, maximize) {
@@ -111,5 +115,5 @@ export function resolveProblem (objFn, restrictions, maximize) {
     results.sort((a, b) => a.z - b.z)
   }
 
-  return results[0]
+  return results
 }
