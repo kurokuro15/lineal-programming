@@ -1,3 +1,14 @@
+const maximoComunDivisor = (a, b) => {
+  // https://parzibyte.me/blog
+  let temporal; //Para no perder b
+  while (b !== 0) {
+      temporal = b;
+      b = a % b;
+      a = temporal;
+  }
+  return a;
+};
+
 // init canvas
 function initCanvas(canvas) {
   // create context
@@ -36,10 +47,12 @@ function createGrid(ctx, size, fUnit) {
   ctx.strokeStyle = 'rgb(0,0,0,0.4)'
   ctx.lineWidth = 1
 
+  let mcd = maximoComunDivisor(maxX, maxY)
+
   //max value of X
-  wUnit = maxX || 20
+  const wUnit = maxX / mcd
   //max value of Y
-  hUnit = maxY || 20
+  const hUnit = maxY / mcd
 
   // Middle of horizontal lines
   const hLineMiddle = (fHunit * 0.25) / 2
@@ -52,7 +65,7 @@ function createGrid(ctx, size, fUnit) {
   for (let i = 0; i > -height; i -= heightInterval) {
     ctx.moveTo(0, i)
     ctx.lineTo(width, i)
-    ctx.fillText(Math.abs(i / heightInterval).toFixed(2), x, i + hLineMiddle, fWunit)
+    ctx.fillText(Math.abs(i / heightInterval * mcd).toFixed(2), x, i + hLineMiddle, fWunit)
   }
   ctx.stroke()
 
@@ -67,11 +80,11 @@ function createGrid(ctx, size, fUnit) {
   for (let i = 0; i < width; i += widthInterval) {
     ctx.moveTo(i, 0)
     ctx.lineTo(i, -height)
-    ctx.fillText(Math.abs(i / widthInterval).toFixed(), i - vLineMiddle, y, fWunit)
+    ctx.fillText(Math.abs(i / widthInterval * mcd).toFixed(), i - vLineMiddle, y, fWunit)
   }
   ctx.stroke()
 
-  return { ctx, units: { widthInterval, heightInterval }, size }
+  return { ctx, units: { widthInterval: widthInterval / mcd, heightInterval: heightInterval / mcd }, size }
 }
 // graph a  restriction function
 function graph(ctx, units, size, fn = {}) {
