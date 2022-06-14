@@ -9,8 +9,8 @@ let width = canvas.width
 
 // actualizar las variables y redibujar el canvas al redimensionar la ventana
 window.addEventListener('resize', () => {
-  canvas.width = canvas.parentElement.clientWidth
-  canvas.height = canvas.parentElement.clientHeight
+  canvas.width = canvas.parentElement.parentElement.previousElementSibling.offsetWidth
+  canvas.height = canvas.parentElement.parentElement.previousElementSibling.offsetWidth
   hUnit = canvas.width / 45
   vUnit = canvas.height / 90
   height = canvas.height - vUnit * 5
