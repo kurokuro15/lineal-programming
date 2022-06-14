@@ -13,6 +13,13 @@
  * @property {Number} x coordinate x of intersection
  * @property {Number} y coordinate y of intersection
  */
+
+/**
+ * @typedef {Object} Data from the form
+ * @property {Equation} objFn Object of Objetive Function
+ * @property {Array<Equation>} restrictions Array of Equations
+ * @property {boolean} maximize if the PL search maximize or minimize the Objetive Function
+ */
 /**
  * Función de emparejamiento, recorre el arreglo las veces necesarias
  * para emparejar los elementos de la matriz al una sola vez
@@ -20,7 +27,7 @@
  * @param {Function} callback any callback that behavior like map
  * @returns {Array}	mapped matched array
  */
-function pairing (array, callback) {
+function pairing(array, callback) {
   const result = []
   for (let i = 0; i < array.length; i++) {
     for (let k = 0; k < array.length; k++) {
@@ -28,7 +35,7 @@ function pairing (array, callback) {
       result.push(callback(array[i], array[k]))
     }
   }
-  return result.filter((e) => e !== undefined)
+  return result.filter(e => e !== undefined)
 }
 
 /**
@@ -39,9 +46,9 @@ function pairing (array, callback) {
  * @param {Number} y
  * @returns {Boolean}
  */
-function coorValidation (conditions, x, y) {
+function coorValidation(conditions, x, y) {
   const valid = []
-  conditions.forEach((el) => {
+  conditions.forEach(el => {
     const { a, b, c, d } = el
     const operation = fixDecimals(a * x + b * y)
     const equalities = {
@@ -51,7 +58,7 @@ function coorValidation (conditions, x, y) {
     }
     valid.push(equalities[d])
   })
-  return valid.every((e) => e === true)
+  return valid.every(e => e === true)
 }
 
 /**
@@ -60,7 +67,7 @@ function coorValidation (conditions, x, y) {
  * @param {Array<Equation>} conditions
  * @returns {Array<Intersection>} coordenadas de la intersección
  */
-function getIntersections (conditions) {
+function getIntersections(conditions) {
   return pairing(conditions, (r1, r2) => {
     const { a, b, c, i } = r1
     const { a: a2, b: b2, c: c2, i: i2 } = r2
@@ -89,14 +96,15 @@ const ejes = [x, y]
  * @param {Array<Equation>} conditions Array of conditions of the problem
  * @returns an array of valid intersections with Z value
  */
-function resolveFnObjective (objFunction, conditions) {
+function resolveFnObjective(objFunction, conditions) {
   const res = []
   const intersections = getIntersections(conditions)
-  intersections.forEach((coordinate) => {
+  intersections.forEach(coordinate => {
     const { x, y } = coordinate
     const { a, b } = objFunction
     const z = a * x + b * y
-    if (coorValidation(conditions, x, y)) res.push({ x: fixDecimals(x), y: fixDecimals(y), z: fixDecimals(z) })
+    if (coorValidation(conditions, x, y))
+      res.push({ x: fixDecimals(x), y: fixDecimals(y), z: fixDecimals(z) })
   })
   return res
 }
@@ -105,7 +113,7 @@ function fixDecimals(number) {
   return Number(number.toFixed(4))
 }
 
-export function resolveProblem (objFn, restrictions, maximize) {
+export function resolveProblem(objFn, restrictions, maximize) {
   restrictions = [...restrictions, ...ejes]
   const results = resolveFnObjective(objFn, restrictions)
 

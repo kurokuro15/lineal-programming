@@ -1,5 +1,3 @@
-
-
 // init canvas
 export function initCanvas(canvas) {
   // create context
@@ -183,35 +181,35 @@ const getRandomRgbColor = () => {
   return `rgb(${r}, ${g}, ${b})`
 }
 // return an array with the max of two attributes of an object[]
-export function maxMax(array, a,b) { 
-let length = array.length
-let maxA = array[length-1][a]
-let maxB = array[length-1][b]
-while(length--){
-	if(array[length][a] > maxA){
-		maxA = array[length][a]
-	}
-	if(array[length][b] > maxB){
-		maxB = array[length][b]
-	}
-}
-return [maxA,maxB]
+export function maxMax(array, a, b) {
+  let length = array.length
+  let maxA = array[length - 1][a]
+  let maxB = array[length - 1][b]
+  while (length--) {
+    if (array[length][a] > maxA) {
+      maxA = array[length][a]
+    }
+    if (array[length][b] > maxB) {
+      maxB = array[length][b]
+    }
+  }
+  return [maxA, maxB]
 }
 const canvas = document.querySelector('#graph')
 
-canvas.width = canvas.parentElement.parentElement.previousElementSibling.offsetWidth
-canvas.height = canvas.parentElement.parentElement.previousElementSibling.offsetHeight
+canvas.width = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
+canvas.height = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
 
 window.addEventListener('resize', () => {
-  canvas.width = canvas.parentElement.parentElement.previousElementSibling.offsetWidth
-  canvas.height = canvas.parentElement.parentElement.previousElementSibling.offsetWidth
+  canvas.width = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
+  canvas.height = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
   let {
     ctx,
     size,
     fUnit: { fWunit, fHunit }
   } = initCanvas(canvas)
-  let[maxX,maxY] = maxMax(restricciones,"x2","y1")
-  
+  let [maxX, maxY] = maxMax(restricciones, 'x2', 'y1')
+
   let { units } = createGrid(ctx, size, { fWunit, fHunit, maxX, maxY })
   restricciones.forEach(re => {
     graph(ctx, units, size, re)
@@ -220,27 +218,26 @@ window.addEventListener('resize', () => {
 })
 
 let {
-	ctx,
+  ctx,
   size,
   fUnit: { fWunit, fHunit }
 } = initCanvas(canvas)
 
-
 const restricciones = [
-	{ x1: 0, y1: 200, i: 0, x2: 300, y2: 0, d: 2 },
+  { x1: 0, y1: 200, i: 0, x2: 300, y2: 0, d: 2 },
   { x1: 0, y1: 280, i: 0, x2: 240, y2: 0, d: 2 }
 ]
 
-let[maxX,maxY] = maxMax(restricciones,"x2","y1")
+let [maxX, maxY] = maxMax(restricciones, 'x2', 'y1')
 
 let { units } = createGrid(ctx, size, { fWunit, fHunit, maxX, maxY })
 
 restricciones.forEach(re => {
-	graph(ctx, units, size, re)
+  graph(ctx, units, size, re)
 })
 
 const vertices = [
-	{ x: 0, y: 0 },
+  { x: 0, y: 0 },
   { x: 0, y: 200 },
   { x: 240, y: 0 },
   { x: 210, y: 60 }
