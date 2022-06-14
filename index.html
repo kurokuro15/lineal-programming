@@ -1,20 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Lineal Programming</title>
-	<script defer src="./index.js"></script>
-	<script defer src="./canvas.js"></script>
-</head>
-<style type="text/css">
-	canvas { 
-		border: 1px solid black; 
-		margin: 1em;
-	}
-</style>
-<body>
-	<canvas id="graph" class="graph" width="300px" height="300px"></canvas>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lineal Programming</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
+      crossorigin="anonymous"
+    />
+    <!-- <script defer src="./canvas.js"></script> -->
+    <script  type="module" src="./cvs.js"></script>
+    <script type="module" src="./form.js"></script>
+  </head>
+  <body>
+    <div class="container my-3">
+      <main class="mx-auto">
+        <header class="p-3 bg-light border rounded text-center">
+          Instituto Universitario Jesús Obrero<br />
+          PROYECTO Investigación de Operaciones I-2022 (JavaScript)<br />
+          Método Gráfico (Programación Lineal)<br />
+          Estudiantes: Reynaldo González (C.I. 26.576.198) | Yhan Montaño (C.I.
+          29.784.799)
+        </header>
+        <hr />
+        <div class="row row-cols-2">
+          <div class="col">
+            <form id="problem-form">
+              <div class="row mb-3 align-items-center">
+                <label class="col-4 col-form-label fw-bold"> Función objetivo: </label>
+                <div class="col">
+                  <div class="row gx-2 align-items-center">
+                    <div class="col-auto">Z(X,Y) =</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <input
+                          class="form-control"
+                          name="f-a"
+                          id="f-a"
+                          required
+                          pattern="\s*[-+]?(\(*\s*\d+([.,]\d+)?\s*\)*\s*([-+/*]\s*\(*\s*\d+([.,]\d+)?\s*\)*\s*)*)"
+                        />
+                        <span class="input-group-text">X</span>
+                      </div>
+                    </div>
+                    <div class="col-auto">+</div>
+                    <div class="col">
+                      <div class="input-group">
+                        <input
+                          class="form-control"
+                          name="f-b"
+                          id="f-b"
+                          required
+                          pattern="\s*[-+]?(\(*\s*\d+([.,]\d+)?\s*\)*\s*([-+/*]\s*\(*\s*\d+([.,]\d+)?\s*\)*\s*)*)"
+                        />
+                        <span class="input-group-text">Y</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row mb-3 align-items-center">
+                <label class="col-4 col-form-label fw-bold" for="optimization">
+                  Tipo de optimización:
+                </label>
+                <div class="col">
+                  <select
+                    class="form-select"
+                    name="optimization-type"
+                    id="optimization-type"
+                    required
+                  >
+                    <option value="0">Minimizar</option>
+                    <option value="1">Maximizar</option>
+                  </select>
+                </div>
+              </div>
+              <label class="form-label fw-bold">Restricciones:</label>
+              <div id="restrictions-container"></div>
+              <hr />
+              <div class="row justify-content-between">
+                <div class="col-auto">
+                  <button
+                    id="btn-add-restriction"
+                    type="button"
+                    class="btn btn-outline-success"
+                  >
+                    Agregar restriccion
+                  </button>
+                </div>
+                <div class="col-auto">
+                  <button type="submit" form="problem-form" class="btn btn-primary">
+                    Resolver
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-6">
+            <div style="height: 600px;">
+              <canvas id="graph"></canvas>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
 </html>
