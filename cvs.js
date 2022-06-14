@@ -175,6 +175,13 @@ const greatestCommonDivisor = (a, b) => {
   }
   return a
 }
+// generar un color random
+const getRandomRgbColor = () => {
+  const r = Math.random() * 255
+  const g = Math.random() * 255
+  const b = Math.random() * 255
+  return `rgb(${r}, ${g}, ${b})`
+}
 // return an array with the max of two attributes of an object[]
 export function maxMax(array, a,b) { 
 let length = array.length
@@ -191,8 +198,26 @@ while(length--){
 return [maxA,maxB]
 }
 const canvas = document.querySelector('#graph')
+
 canvas.width = canvas.parentElement.parentElement.previousElementSibling.offsetWidth
 canvas.height = canvas.parentElement.parentElement.previousElementSibling.offsetHeight
+
+window.addEventListener('resize', () => {
+  canvas.width = canvas.parentElement.parentElement.previousElementSibling.offsetWidth
+  canvas.height = canvas.parentElement.parentElement.previousElementSibling.offsetWidth
+  let {
+    ctx,
+    size,
+    fUnit: { fWunit, fHunit }
+  } = initCanvas(canvas)
+  let[maxX,maxY] = maxMax(restricciones,"x2","y1")
+  
+  let { units } = createGrid(ctx, size, { fWunit, fHunit, maxX, maxY })
+  restricciones.forEach(re => {
+    graph(ctx, units, size, re)
+  })
+  graphChart(ctx, units, vertices)
+})
 
 let {
 	ctx,
