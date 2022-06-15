@@ -1,5 +1,5 @@
 // init canvas
-export function initCanvas(canvas) {
+function initCanvas(canvas, max) {
   // create context
   const ctx = canvas.getContext('2d')
 
@@ -25,10 +25,16 @@ export function initCanvas(canvas) {
   ctx.lineTo(0, 0)
   ctx.lineTo(width, 0)
   ctx.stroke()
-  return { ctx, size: { width, height }, fUnit: { fWunit, fHunit } }
+  
+  const size = { width, height }
+  const fUnit = { fWunit, fHunit, ...max }
+  
+  const { units } = createGrid(ctx, size, fUnit)
+  return { ctx, size, units }
 }
+
 // create grid of cartesian plane
-export function createGrid(ctx, size, fUnit) {
+function createGrid(ctx, size, fUnit) {
   let { fWunit, fHunit, maxX, maxY } = fUnit
   let { width, height } = size
 
@@ -90,12 +96,15 @@ export function createGrid(ctx, size, fUnit) {
   }
 }
 // graph a  restriction function
-export function graph(ctx, units, size, fn = {}) {
+function graphFn({ctx = ctx, size, units, fn = {}}) {
   //destructuring information of units and functions
   const { widthInterval, heightInterval } = units
   const { x1, y1, x2, y2, d } = fn
   const { width, height } = size
   // plot function line
+  console.log(x1 * widthInterval, -(y1 * heightInterval))
+  console.log(x2 * widthInterval, -(y2 * heightInterval))
+  ctx.strokeStyle = 'rgb(0,0,0,1)'
   ctx.beginPath()
   ctx.moveTo(x1 * widthInterval, -(y1 * heightInterval))
   ctx.lineTo(x2 * widthInterval, -(y2 * heightInterval))
@@ -107,9 +116,9 @@ export function graph(ctx, units, size, fn = {}) {
   ctx.moveTo(x1 * widthInterval, -(y1 * heightInterval))
   ctx.lineTo(x2 * widthInterval, -(y2 * heightInterval))
 
-  if (d === 2) {
+  if (d == 2) {
     ctx.lineTo(0, 0)
-  } else if (d === 1) {
+  } else if (d == 1) {
     ctx.lineTo(width, 0)
     ctx.lineTo(width, -height)
     ctx.lineTo(0, -height)
@@ -120,27 +129,27 @@ export function graph(ctx, units, size, fn = {}) {
   ctx.fill()
 }
 // Graph solution sub-plane
-export function graphChart(ctx, units, intervals = []) {
+function graphChart(ctx, units, vectors = []) {
   //Sort objects in array
-  intervals.sort((a, b) => a.x - b.x)
+  vectors.sort((a, b) => a.x - b.x + a.y + b.y)
+  console.log(vectors)
   const { widthInterval, heightInterval } = units
   // add style things
   ctx.fillStyle = 'rgb(255,128,0,0.7)'
   ctx.beginPath()
   //initial dot on the coordinates.
-  const { x, y } = intervals[0]
+  const { x, y } = vectors[0]
   ctx.moveTo(x * widthInterval, -(y * heightInterval))
   // iterate all coordinates and draw a line between they
-  intervals.forEach(interval => {
+  vectors.forEach(interval => {
     const { x, y } = interval
-    console.log(x, y)
     ctx.lineTo(x * widthInterval, -(y * heightInterval))
   })
   // close and fill path
   ctx.closePath()
   ctx.fill()
   // graph point of intersections
-  intervals.forEach(inter => {
+  vectors.forEach(inter => {
     ctx.fillStyle = 'rgb(255,0,0,0.8)'
     ctx.strokeStyle = 'rgb(255,128,0,0.8)'
     ctx.beginPath()
@@ -181,7 +190,7 @@ const getRandomRgbColor = () => {
   return `rgb(${r}, ${g}, ${b})`
 }
 // return an array with the max of two attributes of an object[]
-export function maxMax(array, a, b) {
+function maxMax(array, a, b) {
   let length = array.length
   let maxA = array[length - 1][a]
   let maxB = array[length - 1][b]
@@ -195,51 +204,37 @@ export function maxMax(array, a, b) {
   }
   return [maxA, maxB]
 }
-const canvas = document.querySelector('#graph')
+// const canvas = document.querySelector('#graph')
 
-canvas.width = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
-canvas.height = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
+// canvas.width =
+//   canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
+// canvas.height =
+//   canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
 
-window.addEventListener('resize', () => {
-  canvas.width = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
-  canvas.height = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
-  let {
-    ctx,
-    size,
-    fUnit: { fWunit, fHunit }
-  } = initCanvas(canvas)
-  let [maxX, maxY] = maxMax(restricciones, 'x2', 'y1')
+// window.addEventListener('resize', () => {
+//   canvas.width = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
+//   canvas.height = canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
+//   let {
+//     ctx,
+//     size,
+//     fUnit: { fWunit, fHunit }
+//   } = initCanvas(canvas)
+//   let [maxX, maxY] = maxMax(restricciones, 'x2', 'y1')
 
-  let { units } = createGrid(ctx, size, { fWunit, fHunit, maxX, maxY })
-  restricciones.forEach(re => {
-    graph(ctx, units, size, re)
-  })
-  graphChart(ctx, units, vertices)
-})
+//   let { units } = createGrid(ctx, size, { fWunit, fHunit, maxX, maxY })
+//   restricciones.forEach(re => {
+//     graph(ctx, units, size, re)
+//   })
+//   graphChart(ctx, units, vertices)
+// })
 
-let {
-  ctx,
-  size,
-  fUnit: { fWunit, fHunit }
-} = initCanvas(canvas)
-
-const restricciones = [
-  { x1: 0, y1: 200, i: 0, x2: 300, y2: 0, d: 2 },
-  { x1: 0, y1: 280, i: 0, x2: 240, y2: 0, d: 2 }
-]
-
-let [maxX, maxY] = maxMax(restricciones, 'x2', 'y1')
-
-let { units } = createGrid(ctx, size, { fWunit, fHunit, maxX, maxY })
-
-restricciones.forEach(re => {
-  graph(ctx, units, size, re)
-})
-
-const vertices = [
-  { x: 0, y: 0 },
-  { x: 0, y: 200 },
-  { x: 240, y: 0 },
-  { x: 210, y: 60 }
-]
-graphChart(ctx, units, vertices)
+export {
+  initCanvas,
+  createGrid,
+  graphFn,
+  graphChart,
+  greatestCommonDivisor,
+  getRandomRgbColor,
+  getFontSize,
+  maxMax
+}

@@ -1,54 +1,125 @@
-import { resolveProblem } from './index.js'
+// imports
+import {
+  resolveFnObjective,
+  resolveProblem,
+  getIntersections,
+  pairing,
+  coorValidation,
+  round,
+  ejes
+} from './logic.js'
+import { initCanvas, maxMax, graphFn, graphChart } from './graphic.js'
+/**
+ * @typedef {import('./logic.js').Data} Data
+ */
+
+// selector de elementos
+let container = ''
+let form = ''
+let graph = ''
+document.addEventListener('DOMContentLoaded', () => {
+  container = document.querySelector('#restrictions-container')
+  form = document.querySelector('#problem-form')
+  form.addEventListener('submit', initByEvent)
+  addRestriction()
+  addRestriction()
+  graph = document.querySelector('#graph')
+  graph.width =
+      graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
+    graph.height =
+      graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
+  window.addEventListener('resize', () => {
+    graph.width =
+      graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
+    graph.height =
+      graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
+    initByEvent()
+  })
+  document.querySelector('#btn-add-restriction').addEventListener('click', () => {
+    if (restrictionCount < 4) {
+      addRestriction(true)
+    } else {
+      alert('Máximo 4 restricciones')
+    }
+  })
+})
 
 const mathExpPattern =
   '\\s*[-+]?(\\(*\\s*\\d+([.,]\\d+)?\\s*\\)*\\s*([-+/*]\\s*\\(*\\s*\\d+([.,]\\d+)?\\s*\\)*\\s*)*)'
 
-const form = document.querySelector('#problem-form')
+// counter de restricciones
+let restrictionCount = 0
 
-// procesar los datos del form al hacer submit
-form.addEventListener('submit', evt => {
-  evt.preventDefault()
+/**
+ * Global Data Object
+ * @type {Data}
+ * {@link Data}
+ */
+const data = {
+  equations: []
+}
 
-  const values = Object.fromEntries(new FormData(form))
-
-  const data = {
-    objFn: { i: 0, d: 0 },
-    restrictions: [],
-    maximize: null
-  }
-
-  Object.keys(values).forEach(key => {
-    const propName = key.split('-')
-
-    switch (propName[0]) {
+// procesa los datos del form al escuchar el evento submit
+function initByEvent(event) {
+  event?.preventDefault()
+  const form = Object.fromEntries(new FormData(event.target || window.form))
+  // mapping data from form to data
+  Object.keys(form).forEach(key => {
+    const [type, index, prop] = key.split('-')
+    switch (type) {
       case 'r':
-        data.restrictions[propName[1]] = {
-          ...data.restrictions[propName[1]],
-          [propName[2]]: Number(eval(values[key]))
-        }
+        data.equations[index] = { ...data.equations[index], [prop]: form[key] }
         break
       case 'f':
-        data.objFn = {
-          ...data.objFn,
-          [propName[1]]: Number(eval(values[key]))
-        }
+        data.objFn = { ...data.objFn, [index]: form[key] }
         break
       case 'optimization':
-        data.maximize = Number(values[key])
+        data.maximize = form[key]
         break
     }
   })
 
-  console.log(data)
+  // Calculamos toh acá :V 
+  calculatePL(data)
 
-  const result = resolveProblem(data.objFn, data.restrictions, data.maximize)
+}
 
-  alert(`La solución óptima es: x = ${result.x}, y = ${result.y} con z = ${result.z}`)
-})
+// Esta es para calcular la vida entera :v 
+function calculatePL(data) {
+  const { objFn, equations, maximize } = data
+
+  const axieInter = getIntersections([...equations, ...ejes]).filter(x => x.i2 > 100)
+  // console.log(axieInter)
+  let axies = []
+  for (let i = 0; i < axieInter.length; i += 2) {
+    const { x: x1, y: y1, d } = axieInter[i]
+    const { x: x2, y: y2 } = axieInter[i + 1]
+    axies.push({ x1, y1, x2, y2, d })
+  }
+  // console.log(axies)
+  const [maxX, maxY] = maxMax(axies, 'x2', 'y1')
+  const max = { maxX, maxY }
+  const context = initCanvas(graph, max)
+
+  // console.log(context)
+
+  axies.forEach(axie => {
+    console.log({ ...context, axie })
+    graphFn({ ...context, fn: axie })
+  })
+
+  const { result } = resolveFnObjective(objFn, equations)
+  if (maximize === 'true') {
+    result.sort((a, b) => b.z - a.z).push({ x: 0, y: 0, z: 0 })
+  } else {
+    result.sort((a, b) => a.z - b.z) //.push({x: context.size.width, y: context.size.height, z: Infinity})
+  }
+  graphChart(context.ctx, context.units, result)
+  alert(JSON.stringify(result))
+}
 
 // agregar restricciones
-let restrictionCount = 0
-const container = document.querySelector('#restrictions-container')
+
 function addRestriction(removable = false) {
   const restriction = document.createElement('div')
   restriction.className = 'row gx-2 align-items-center mb-3'
@@ -136,14 +207,3 @@ function addRestriction(removable = false) {
   restrictionCount += 1
 }
 
-// por defecto, iniciar con dos restricciones
-addRestriction()
-addRestriction()
-
-document.querySelector('#btn-add-restriction').addEventListener('click', () => {
-  if (restrictionCount < 4) {
-    addRestriction(true)
-  } else {
-    alert('Máximo 4 restricciones')
-  }
-})
