@@ -32,9 +32,12 @@ Calculadora de programación lineal a través del método Gráfico, para dos o m
   - **Listo** Validación ante restricciones y función objetivo de los puntos de corte e intersecciones halladas.
   - **Listo** Agrupación e identificación de puntos de corte con eje XY para graficación.
 
-- **Pendiente** Graficación de funciones
+- **Listo** Graficación de funciones
 - **Listo** Interface
   - **Listo** Formulario de datos:
     - **Listo** Función objetivo del tipo : Z = Ax + By
     - **Listo** N Restricciones del tipo: Rn >= y/o <= Ax + By
     - **Listo** Identificar maximización o minimización
+
+###### **Pendiente**
+- Revisar bugs de Gráfica donde se vuelve un ocho con minimizaciones.
