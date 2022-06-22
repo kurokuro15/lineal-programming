@@ -25,23 +25,24 @@ document.addEventListener('DOMContentLoaded', () => {
   addRestriction()
   graph = document.querySelector('#graph')
   graph.width =
-      graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
-    graph.height =
-      graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
+    graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
+  graph.height =
+    graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
   window.addEventListener('resize', () => {
     graph.width =
       graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
     graph.height =
       graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
-    initByEvent()
   })
-  document.querySelector('#btn-add-restriction').addEventListener('click', () => {
-    if (restrictionCount < 4) {
-      addRestriction(true)
-    } else {
-      alert('Máximo 4 restricciones')
-    }
-  })
+  document
+    .querySelector('#btn-add-restriction')
+    .addEventListener('click', () => {
+      if (restrictionCount < 4) {
+        addRestriction(true)
+      } else {
+        alert('Máximo 4 restricciones')
+      }
+    })
 })
 
 const mathExpPattern =
@@ -60,7 +61,7 @@ const data = {
 }
 
 // procesa los datos del form al escuchar el evento submit
-function initByEvent(event) {
+function initByEvent (event) {
   event?.preventDefault()
   const form = Object.fromEntries(new FormData(event.target || window.form))
   // mapping data from form to data
@@ -74,53 +75,94 @@ function initByEvent(event) {
         data.objFn = { ...data.objFn, [index]: form[key] }
         break
       case 'optimization':
-        data.maximize = form[key]
+        data.maximize = !!Number(form[key])
         break
     }
   })
 
-  // Calculamos toh acá :V 
+  // Calculamos toh acá :V
   calculatePL(data)
-
 }
 
-// Esta es para calcular la vida entera :v 
-function calculatePL(data) {
+// Esta es para calcular la vida entera :v
+function calculatePL (data) {
   const { objFn, equations, maximize } = data
 
-  const axieInter = getIntersections([...equations, ...ejes]).filter(x => x.i2 > 100)
-  // console.log(axieInter)
+  const axieInter = getIntersections([...equations, ...ejes]).filter(
+    x => x.i2 > 100
+  )
+
   let axies = []
   for (let i = 0; i < axieInter.length; i += 2) {
     const { x: x1, y: y1, d } = axieInter[i]
     const { x: x2, y: y2 } = axieInter[i + 1]
     axies.push({ x1, y1, x2, y2, d })
   }
-  // console.log(axies)
+
   const [maxX, maxY] = maxMax(axies, 'x2', 'y1')
   const max = { maxX, maxY }
   const context = initCanvas(graph, max)
 
-  // console.log(context)
-
   axies.forEach(axie => {
-    console.log({ ...context, axie })
     graphFn({ ...context, fn: axie })
   })
 
   const { result } = resolveFnObjective(objFn, equations)
-  if (maximize === 'true') {
+  if (maximize) {
     result.sort((a, b) => b.z - a.z).push({ x: 0, y: 0, z: 0 })
   } else {
     result.sort((a, b) => a.z - b.z) //.push({x: context.size.width, y: context.size.height, z: Infinity})
   }
   graphChart(context.ctx, context.units, result)
-  alert(JSON.stringify(result))
+  showResults(result, maximize)
+}
+
+/**
+ * Muestra los resultados de la operación en la página
+ * @param {Array<Result>} results
+ */
+function showResults (results, maximize) {
+  const resultsWrapper = document.getElementById('results-container')
+  resultsWrapper.style = ''
+
+  const resultsContainer = document.getElementById('results')
+
+  deleteChilds(resultsContainer)
+
+  results.forEach(({ x, y, z }, i) => {
+    const rowNumber = i + 1
+
+    const resultRow = document.createElement('div')
+    resultRow.className = 'row'
+    resultRow.innerHTML = `
+        <div class='col col-2'>${rowNumber}) (${x}, ${y})</div>
+        <div class='col col-auto'><div class='vr'></div></div>
+        <div class='col col-auto'>Z(${x}, ${y}) = ${z}</div>
+    `
+
+    resultsContainer.appendChild(resultRow)
+  })
+
+  const operationText = maximize ? 'maximiza' : 'minimiza'
+
+  const bestResultMsg = document.createElement('div')
+  bestResultMsg.className = 'col col-auto text-success'
+  bestResultMsg.textContent = `<-- Este punto ${operationText} la función objetivo`
+  resultsContainer.firstElementChild.appendChild(bestResultMsg)
+}
+
+/**
+ * Elimina los nodos hijos de un elemento dado
+ * @param {HTMLElement} element
+ */
+function deleteChilds (element) {
+  while (element.childElementCount > 0) {
+    element.removeChild(element.firstChild)
+  }
 }
 
 // agregar restricciones
-
-function addRestriction(removable = false) {
+function addRestriction (removable = false) {
   const restriction = document.createElement('div')
   restriction.className = 'row gx-2 align-items-center mb-3'
   restriction.innerHTML = `
@@ -206,4 +248,3 @@ function addRestriction(removable = false) {
 
   restrictionCount += 1
 }
-

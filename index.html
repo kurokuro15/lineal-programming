@@ -28,7 +28,9 @@
           <div class="col mb-4">
             <form id="problem-form">
               <div class="row mb-3 align-items-center">
-                <label class="col-4 col-form-label fw-bold"> Función objetivo: </label>
+                <label class="col-4 col-form-label fw-bold">
+                  Función objetivo:
+                </label>
                 <div class="col">
                   <div class="row gx-2 align-items-center">
                     <div class="col-auto">Z(X,Y) =</div>
@@ -71,8 +73,8 @@
                     id="optimization-type"
                     required
                   >
-                    <option value="false">Minimizar</option>
-                    <option selected value="true">Maximizar</option>
+                    <option value="0">Minimizar</option>
+                    <option selected value="1">Maximizar</option>
                   </select>
                 </div>
               </div>
@@ -90,7 +92,11 @@
                   </button>
                 </div>
                 <div class="col-auto">
-                  <button type="submit" form="problem-form" class="btn btn-primary">
+                  <button
+                    type="submit"
+                    form="problem-form"
+                    class="btn btn-primary"
+                  >
                     Resolver
                   </button>
                 </div>
@@ -102,6 +108,13 @@
               <canvas id="graph"></canvas>
             </div>
           </div>
+        </div>
+
+        <hr />
+
+        <div class="col" id="results-container" style="display: none;">
+          <h3>Puntos factibles</h3>
+          <div id="results" class="d-flex flex-column"></div>
         </div>
       </main>
     </div>
