@@ -63,11 +63,11 @@ function initByEvent (event) {
       case 'r':
         data.equations[index] = {
           ...data.equations[index],
-          [prop]: parseInt(form[key])
+          [prop]: Number(form[key])
         }
         break
       case 'f':
-        data.objFn = { ...data.objFn, [index]: parseInt(form[key]) }
+        data.objFn = { ...data.objFn, [index]: Number(form[key]) }
         break
       case 'optimization':
         data.maximize = !!Number(form[key])

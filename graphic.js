@@ -236,7 +236,8 @@ export class Graph {
       )
       ctx.fill()
       ctx.stroke()
-
+      
+      // Graph intersections label
       ctx.fillStyle = 'rgb(0,0,0)'
       ctx.fillText(
         `(${inter.x}, ${inter.y})`,
@@ -276,6 +277,11 @@ const greatestCommonDivisor = (a, b) => {
   }
   return a
 }
+
+const gcd = (...arr) => {
+  const _gcd = (x, y) => (!y ? x : gcd(y, x % y));
+  return [...arr].reduce((a, b) => _gcd(Math.abs(a), Math.abs(b)));
+};
 
 /**
  * Generates a random RGB color
