@@ -102,8 +102,8 @@ function graphFn({ctx = ctx, size, units, fn = {}}) {
   const { x1, y1, x2, y2, d } = fn
   const { width, height } = size
   // plot function line
-  console.log(x1 * widthInterval, -(y1 * heightInterval))
-  console.log(x2 * widthInterval, -(y2 * heightInterval))
+
+
   ctx.strokeStyle = 'rgb(0,0,0,1)'
   ctx.beginPath()
   ctx.moveTo(x1 * widthInterval, -(y1 * heightInterval))
@@ -132,7 +132,7 @@ function graphFn({ctx = ctx, size, units, fn = {}}) {
 function graphChart(ctx, units, vectors = []) {
   //Sort objects in array
   vectors.sort((a, b) => a.x - b.x + a.y + b.y)
-  console.log(vectors)
+
   const { widthInterval, heightInterval } = units
   // add style things
   ctx.fillStyle = 'rgb(255,128,0,0.7)'

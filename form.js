@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
       graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
     graph.height =
       graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
-    initByEvent()
   })
   document
     .querySelector('#btn-add-restriction')
@@ -92,22 +91,22 @@ function calculatePL(data) {
   const axieInter = getIntersections([...equations, ...ejes]).filter(
     x => x.i2 > 100
   )
-  // console.log(axieInter)
+
   let axies = []
   for (let i = 0; i < axieInter.length; i += 2) {
     const { x: x1, y: y1, d } = axieInter[i]
     const { x: x2, y: y2 } = axieInter[i + 1]
     axies.push({ x1, y1, x2, y2, d })
   }
-  // console.log(axies)
+
   const [maxX, maxY] = maxMax(axies, 'x2', 'y1')
   const max = { maxX, maxY }
   const context = initCanvas(graph, max)
 
-  // console.log(context)
+
 
   axies.forEach(axie => {
-    console.log({ ...context, axie })
+
     graphFn({ ...context, fn: axie })
   })
 
@@ -148,7 +147,7 @@ function showResults(results, maximize) {
   })
 
   const operationText = maximize ? 'maximiza' : 'minimiza'
-  console.log({ operationText })
+
 
   const bestResultMsg = document.createElement('div')
   bestResultMsg.className = 'col col-auto text-success'
