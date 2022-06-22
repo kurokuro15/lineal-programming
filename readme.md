@@ -40,4 +40,5 @@ Calculadora de programación lineal a través del método Gráfico, para dos o m
     - **Listo** Identificar maximización o minimización
 
 ###### **Pendiente**
+
 - Revisar bugs de Gráfica donde se vuelve un ocho con minimizaciones.
