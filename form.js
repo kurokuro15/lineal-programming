@@ -61,7 +61,7 @@ const data = {
 }
 
 // procesa los datos del form al escuchar el evento submit
-function initByEvent(event) {
+function initByEvent (event) {
   event?.preventDefault()
   const form = Object.fromEntries(new FormData(event.target || window.form))
   // mapping data from form to data
@@ -85,7 +85,7 @@ function initByEvent(event) {
 }
 
 // Esta es para calcular la vida entera :v
-function calculatePL(data) {
+function calculatePL (data) {
   const { objFn, equations, maximize } = data
 
   const axieInter = getIntersections([...equations, ...ejes]).filter(
@@ -103,10 +103,7 @@ function calculatePL(data) {
   const max = { maxX, maxY }
   const context = initCanvas(graph, max)
 
-
-
   axies.forEach(axie => {
-
     graphFn({ ...context, fn: axie })
   })
 
@@ -124,7 +121,7 @@ function calculatePL(data) {
  * Muestra los resultados de la operación en la página
  * @param {Array<Result>} results
  */
-function showResults(results, maximize) {
+function showResults (results, maximize) {
   const resultsWrapper = document.getElementById('results-container')
   resultsWrapper.style = ''
 
@@ -148,7 +145,6 @@ function showResults(results, maximize) {
 
   const operationText = maximize ? 'maximiza' : 'minimiza'
 
-
   const bestResultMsg = document.createElement('div')
   bestResultMsg.className = 'col col-auto text-success'
   bestResultMsg.textContent = `<-- Este punto ${operationText} la función objetivo`
@@ -159,14 +155,14 @@ function showResults(results, maximize) {
  * Elimina los nodos hijos de un elemento dado
  * @param {HTMLElement} element
  */
-function deleteChilds(element) {
+function deleteChilds (element) {
   while (element.childElementCount > 0) {
     element.removeChild(element.firstChild)
   }
 }
 
 // agregar restricciones
-function addRestriction(removable = false) {
+function addRestriction (removable = false) {
   const restriction = document.createElement('div')
   restriction.className = 'row gx-2 align-items-center mb-3'
   restriction.innerHTML = `

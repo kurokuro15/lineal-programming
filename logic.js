@@ -22,20 +22,20 @@
 
 /*constantes, "ecuaciones" que representan el corte con el eje X y el eje Y de la gráfica*/
 /**
- * @type {Equation} 
+ * @type {Equation}
  * {@link Equation}
  */
- const x = { a: 1, b: 0, c: 0, i: 330, d: 1 }
- /**
-  * @type {Equation}
-  * {@link Equation}
-  */
- const y = { a: 0, b: 1, c: 0, i: 770, d: 1 }
- /**
-  * @type {Array<Equation>}
-  * {@link Equation} Array of Equations
-  */
- const ejes = [x, y]
+const x = { a: 1, b: 0, c: 0, i: 330, d: 1 }
+/**
+ * @type {Equation}
+ * {@link Equation}
+ */
+const y = { a: 0, b: 1, c: 0, i: 770, d: 1 }
+/**
+ * @type {Array<Equation>}
+ * {@link Equation} Array of Equations
+ */
+const ejes = [x, y]
 /**
  * Función de emparejamiento, recorre el arreglo las veces necesarias
  * para emparejar los elementos de la matriz al una sola vez
@@ -43,12 +43,12 @@
  * @param {Function} callback any callback that behavior like map
  * @returns {Array}	mapped matched array
  */
-function pairing(array, callback) {
+function pairing (array, callback) {
   const result = []
   for (let i = 0; i < array.length; i++) {
     for (let k = 0; k < array.length; k++) {
       if (i === k || i > k) continue
-      result.push(callback((array[i]), array[k]))
+      result.push(callback(array[i], array[k]))
     }
   }
   return result.filter(e => e !== undefined)
@@ -62,7 +62,7 @@ function pairing(array, callback) {
  * @param {Number} y
  * @returns {Boolean}
  */
-function coorValidation(conditions, x, y) {
+function coorValidation (conditions, x, y) {
   const valid = []
   conditions.forEach(el => {
     const { a, b, c, d } = el
@@ -83,17 +83,15 @@ function coorValidation(conditions, x, y) {
  * @param {Array<Equation>} equations
  * @returns {Array<Intersection>} coordenadas de la intersección
  */
-function getIntersections(equations) {
+function getIntersections (equations) {
   return pairing(equations, (r1, r2) => {
     const { a, b, c, i, d } = r1
     const { a: a2, b: b2, c: c2, i: i2 } = r2
     const y = round((a * c2 - a2 * c) / (a * b2 - a2 * b))
     const x = round((c - b * y) / a)
-    if ( i+i2 !== 1100) return { x, y, i, i2, d }
+    if (i + i2 !== 1100) return { x, y, i, i2, d }
   })
 }
-
-
 
 /**
  * Función para resolver la función objetivo con cada coordenada.
@@ -102,7 +100,7 @@ function getIntersections(equations) {
  * @param {Array<Equation>} equations Array of conditions of the problem
  * @returns an array of valid intersections with Z value
  */
-function resolveFnObjective(objFunction, equations) {
+function resolveFnObjective (objFunction, equations) {
   const result = []
   const intersections = getIntersections([...equations, ...ejes])
   intersections.forEach(coordinate => {
@@ -112,34 +110,40 @@ function resolveFnObjective(objFunction, equations) {
     if (coorValidation(equations, x, y))
       result.push({ x: round(x), y: round(y), z: round(z) })
   })
-  return {result, intersections}
+  return { result, intersections }
 }
 
-function round(number) {
+function round (number) {
   return Math.round(number * 100) / 100
 }
 
-function resolveProblem(objFn, restrictions, maximize) {
-  const {result, intersections} = resolveFnObjective(objFn, [...restrictions, ...ejes])
+function resolveProblem (objFn, restrictions, maximize) {
+  const { result, intersections } = resolveFnObjective(objFn, [
+    ...restrictions,
+    ...ejes
+  ])
   if (maximize) {
     result.sort((a, b) => b.z - a.z)
   } else {
     result.sort((a, b) => a.z - b.z)
   }
-  const coordinates = intersections.map( equation => { 
-    if(equation.i < 200) {
-      return undefined
-    }
-    return equation
-  }).filter(e => e !== undefined)
-  return {result, coordinates}
+  const coordinates = intersections
+    .map(equation => {
+      if (equation.i < 200) {
+        return undefined
+      }
+      return equation
+    })
+    .filter(e => e !== undefined)
+  return { result, coordinates }
 }
 
 export {
-resolveProblem,
+  resolveProblem,
   resolveFnObjective,
   getIntersections,
   pairing,
   coorValidation,
   round,
-  ejes}
+  ejes
+}

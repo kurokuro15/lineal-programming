@@ -1,5 +1,5 @@
 // init canvas
-function initCanvas(canvas, max) {
+function initCanvas (canvas, max) {
   // create context
   const ctx = canvas.getContext('2d')
 
@@ -25,16 +25,16 @@ function initCanvas(canvas, max) {
   ctx.lineTo(0, 0)
   ctx.lineTo(width, 0)
   ctx.stroke()
-  
+
   const size = { width, height }
   const fUnit = { fWunit, fHunit, ...max }
-  
+
   const { units } = createGrid(ctx, size, fUnit)
   return { ctx, size, units }
 }
 
 // create grid of cartesian plane
-function createGrid(ctx, size, fUnit) {
+function createGrid (ctx, size, fUnit) {
   let { fWunit, fHunit, maxX, maxY } = fUnit
   let { width, height } = size
 
@@ -91,18 +91,20 @@ function createGrid(ctx, size, fUnit) {
 
   return {
     ctx,
-    units: { widthInterval: widthInterval / gcd, heightInterval: heightInterval / gcd },
+    units: {
+      widthInterval: widthInterval / gcd,
+      heightInterval: heightInterval / gcd
+    },
     size
   }
 }
 // graph a  restriction function
-function graphFn({ctx = ctx, size, units, fn = {}}) {
+function graphFn ({ ctx = ctx, size, units, fn = {} }) {
   //destructuring information of units and functions
   const { widthInterval, heightInterval } = units
   const { x1, y1, x2, y2, d } = fn
   const { width, height } = size
   // plot function line
-
 
   ctx.strokeStyle = 'rgb(0,0,0,1)'
   ctx.beginPath()
@@ -129,7 +131,7 @@ function graphFn({ctx = ctx, size, units, fn = {}}) {
   ctx.fill()
 }
 // Graph solution sub-plane
-function graphChart(ctx, units, vectors = []) {
+function graphChart (ctx, units, vectors = []) {
   //Sort objects in array
   vectors.sort((a, b) => a.x - b.x + a.y + b.y)
 
@@ -166,9 +168,12 @@ function graphChart(ctx, units, vectors = []) {
   })
 }
 //helper
-function getFontSize() {
+function getFontSize () {
   return Number(
-    window.getComputedStyle(document.body).getPropertyValue('font-size').match(/\d+/)[0]
+    window
+      .getComputedStyle(document.body)
+      .getPropertyValue('font-size')
+      .match(/\d+/)[0]
   )
 }
 // get the  greatest common divisor
@@ -190,7 +195,7 @@ const getRandomRgbColor = () => {
   return `rgb(${r}, ${g}, ${b})`
 }
 // return an array with the max of two attributes of an object[]
-function maxMax(array, a, b) {
+function maxMax (array, a, b) {
   let length = array.length
   let maxA = array[length - 1][a]
   let maxB = array[length - 1][b]
