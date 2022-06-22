@@ -209,7 +209,7 @@ export class Graph {
 
     // Write restriction tag
     ctx.fillStyle = color
-    ctx.fillText(`Restricción ${i}`, midPoint[1] + 4, midPoint[0] - 4)
+    ctx.fillText(`Restricción ${i + 1}`, midPoint[1] + 4, midPoint[0] - 4)
   }
 
   /**
