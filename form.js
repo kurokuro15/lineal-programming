@@ -1,14 +1,6 @@
 // imports
-import {
-  resolveFnObjective,
-  resolveProblem,
-  getIntersections,
-  pairing,
-  coorValidation,
-  round,
-  ejes
-} from './logic.js'
-import { initCanvas, maxMax, graphFn, graphChart } from './graphic.js'
+import { Graph } from './graphic.js'
+import { ejes, getIntersections, resolveFnObjective } from './logic.js'
 /**
  * @typedef {import('./logic.js').Data} Data
  */
@@ -16,23 +8,23 @@ import { initCanvas, maxMax, graphFn, graphChart } from './graphic.js'
 // selector de elementos
 let container = ''
 let form = ''
-let graph = ''
+let canvas = ''
 document.addEventListener('DOMContentLoaded', () => {
   container = document.querySelector('#restrictions-container')
   form = document.querySelector('#problem-form')
   form.addEventListener('submit', initByEvent)
   addRestriction()
   addRestriction()
-  graph = document.querySelector('#graph')
-  graph.width =
-    graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
-  graph.height =
-    graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
+  canvas = document.querySelector('#graph')
+  canvas.width =
+    canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
+  canvas.height =
+    canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
   window.addEventListener('resize', () => {
-    graph.width =
-      graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
-    graph.height =
-      graph.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
+    canvas.width =
+      canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
+    canvas.height =
+      canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
   })
   document
     .querySelector('#btn-add-restriction')
@@ -88,33 +80,28 @@ function initByEvent (event) {
 function calculatePL (data) {
   const { objFn, equations, maximize } = data
 
-  const axieInter = getIntersections([...equations, ...ejes]).filter(
+  const axisIntersections = getIntersections([...equations, ...ejes]).filter(
     x => x.i2 > 100
   )
 
-  let axies = []
-  for (let i = 0; i < axieInter.length; i += 2) {
-    const { x: x1, y: y1, d } = axieInter[i]
-    const { x: x2, y: y2 } = axieInter[i + 1]
-    axies.push({ x1, y1, x2, y2, d })
+  let lines = []
+  for (let i = 0; i < axisIntersections.length; i += 2) {
+    const { x: x1, y: y1, d } = axisIntersections[i]
+    const { x: x2, y: y2 } = axisIntersections[i + 1]
+    lines.push({ x1, y1, x2, y2, d })
   }
 
-  const [maxX, maxY] = maxMax(axies, 'x2', 'y1')
-  const max = { maxX, maxY }
-  const context = initCanvas(graph, max)
+  const { vertices } = resolveFnObjective(objFn, equations)
 
-  axies.forEach(axie => {
-    graphFn({ ...context, fn: axie })
-  })
-
-  const { result } = resolveFnObjective(objFn, equations)
   if (maximize) {
-    result.sort((a, b) => b.z - a.z).push({ x: 0, y: 0, z: 0 })
+    vertices.sort((a, b) => b.z - a.z).push({ x: 0, y: 0, z: 0 })
   } else {
-    result.sort((a, b) => a.z - b.z) //.push({x: context.size.width, y: context.size.height, z: Infinity})
+    vertices.sort((a, b) => a.z - b.z)
   }
-  graphChart(context.ctx, context.units, result)
-  showResults(result, maximize)
+
+  const graph = new Graph(canvas, { lines, vertices })
+
+  showResults(vertices, maximize)
 }
 
 /**

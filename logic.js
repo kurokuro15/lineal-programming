@@ -20,6 +20,22 @@
  * @property {boolean} maximize if the PL search maximize or minimize the Objetive Function
  */
 
+/**
+ * @typedef {object} RestrictionLine
+ * @property {number} x1
+ * @property {number} x2
+ * @property {number} y1
+ * @property {number} y2
+ * @property {number} d Direction of the restriction
+ */
+
+/**
+ * @typedef {object} ResultVertex
+ * @property {number} x
+ * @property {number} y
+ * @property {number} z
+ */
+
 /*constantes, "ecuaciones" que representan el corte con el eje X y el eje Y de la gráfica*/
 /**
  * @type {Equation}
@@ -98,19 +114,19 @@ function getIntersections (equations) {
  * Devolviendo un arreglo de objetos con las coordenadas y el valor de Z.
  * @param {Equation} objFunction Objective Function of the problem
  * @param {Array<Equation>} equations Array of conditions of the problem
- * @returns an array of valid intersections with Z value
+ * @returns an object containing solution vertices and intersections
  */
 function resolveFnObjective (objFunction, equations) {
-  const result = []
+  const vertices = []
   const intersections = getIntersections([...equations, ...ejes])
   intersections.forEach(coordinate => {
     const { x, y } = coordinate
     const { a, b } = objFunction
     const z = a * x + b * y
     if (coorValidation(equations, x, y))
-      result.push({ x: round(x), y: round(y), z: round(z) })
+      vertices.push({ x: round(x), y: round(y), z: round(z) })
   })
-  return { result, intersections }
+  return { vertices, intersections }
 }
 
 function round (number) {
