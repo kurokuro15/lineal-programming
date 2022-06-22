@@ -98,11 +98,7 @@ function calculatePL (data) {
     vertices.sort((a, b) => a.z - b.z)
   }
 
-  vertices.push({ x: 0, y: 0, z: 0 })
-
   const graph = new Graph(canvas, { lines, vertices })
-
-  vertices.pop()
 
   showResults(vertices, maximize)
 }

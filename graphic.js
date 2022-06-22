@@ -112,7 +112,7 @@ export class Graph {
       ctx.moveTo(0, i)
       ctx.lineTo(width, i)
       ctx.fillText(
-        Math.abs((i / heightInterval) * gcd).toFixed(2),
+        Math.abs((i / heightInterval) * gcd).toFixed(),
         x,
         i + hLineMiddle,
         fWunit
@@ -133,7 +133,7 @@ export class Graph {
       ctx.fillText(
         Math.abs((i / widthInterval) * gcd).toFixed(),
         i - vLineMiddle,
-        y,
+        y + fHunit / 2,
         fWunit
       )
     }
@@ -192,6 +192,7 @@ export class Graph {
 
   graphChart (vertices = []) {
     const orderedVertices = [...vertices]
+    orderedVertices.push({ x: 0, y: 0, z: 0 })
 
     // Sort objects in array
     orderedVertices.sort((a, b) => a.x - b.x + a.y + b.y)
