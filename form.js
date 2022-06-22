@@ -61,10 +61,13 @@ function initByEvent (event) {
     const [type, index, prop] = key.split('-')
     switch (type) {
       case 'r':
-        data.equations[index] = { ...data.equations[index], [prop]: form[key] }
+        data.equations[index] = {
+          ...data.equations[index],
+          [prop]: parseInt(form[key])
+        }
         break
       case 'f':
-        data.objFn = { ...data.objFn, [index]: form[key] }
+        data.objFn = { ...data.objFn, [index]: parseInt(form[key]) }
         break
       case 'optimization':
         data.maximize = !!Number(form[key])

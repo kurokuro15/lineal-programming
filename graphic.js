@@ -3,6 +3,13 @@
  * @typedef {import('./logic.js').RestrictionLine} RestrictionLine
  */
 
+const colors = [
+  ['rgb(2, 48, 71)', 'rgb(2, 48, 71, 0.2)'],
+  ['rgb(214, 40, 40)', 'rgb(247, 127, 0, 0.2)'],
+  ['rgb(0, 109, 119)', 'rgb(0, 109, 119, 0.2)'],
+  ['rgb(97, 19, 205)', 'rgb(127, 50, 236, 0.2)']
+]
+
 export class Graph {
   /**
    * Creates a new Graph object
@@ -60,14 +67,15 @@ export class Graph {
     this.initPlot()
     this.drawGrid()
     this.data.lines.forEach((line, i) => this.drawRestriction(line, i + 1))
-    this.graphChart(this.data.vertices)
+    this.data.lines.forEach((line, i) => this.drawRestrictionTag(line, i))
+    this.drawVertices(this.data.vertices)
   }
 
   /**
    * Initializes the plot drawing the axes
    */
   initPlot () {
-    const { ctx, fWunit, width, height, fHunit } = this
+    const { ctx, width, height, fHunit } = this
 
     // Prepare lines color and width
     ctx.strokeStyle = 'rgb(0,0,0)'
@@ -150,21 +158,14 @@ export class Graph {
     const widthInterval = this.widthInterval / gcd
     const heightInterval = this.heightInterval / gcd
 
-    const [transparentColor, color] = getRandomRgbColor(0.25)
+    const [color, transparentColor] = colors[i - 1]
 
     // Draw function line
-    ctx.strokeStyle = 'rgb(0,0,0,1)'
+    ctx.strokeStyle = color
     ctx.beginPath()
     ctx.moveTo(x1 * widthInterval, -(y1 * heightInterval))
     ctx.lineTo(x2 * widthInterval, -(y2 * heightInterval))
     ctx.stroke()
-
-    const midPoint = calcMidPoint(
-      x1 * widthInterval,
-      -(y1 * heightInterval),
-      x2 * widthInterval,
-      -(y2 * heightInterval)
-    )
 
     // Draw accepted plane
     ctx.fillStyle = transparentColor
@@ -184,42 +185,44 @@ export class Graph {
 
     ctx.closePath()
     ctx.fill()
+  }
+
+  /**
+   * Draws a given restriction's tag
+   * @param {RestrictionLine} restriction
+   * @param {number} i
+   */
+  drawRestrictionTag (restriction, i) {
+    const { ctx } = this
+    const { x1, y1, x2, y2 } = restriction
+    const widthInterval = this.widthInterval / this.gcd
+    const heightInterval = this.heightInterval / this.gcd
+
+    const midPoint = calcMidPoint(
+      x1 * widthInterval,
+      -(y1 * heightInterval),
+      x2 * widthInterval,
+      -(y2 * heightInterval)
+    )
+
+    const [color] = colors[i]
 
     // Write restriction tag
-    ctx.fillStyle = 'rgb(0,0,0,1)'
+    ctx.fillStyle = color
     ctx.fillText(`Restricción ${i}`, midPoint[1] + 4, midPoint[0] - 4)
   }
 
-  graphChart (vertices = []) {
-    const orderedVertices = [...vertices]
-    orderedVertices.push({ x: 0, y: 0, z: 0 })
-
-    // Sort objects in array
-    orderedVertices.sort((a, b) => a.x - b.x + a.y + b.y)
-
+  /**
+   * Draws the vertices points and it's tags
+   * @param {Array<ResultVertex>} vertices
+   */
+  drawVertices (vertices = []) {
     const { ctx, gcd } = this
     const widthInterval = this.widthInterval / gcd
     const heightInterval = this.heightInterval / gcd
 
-    // Add style things
-    ctx.fillStyle = 'rgb(255,128,0,0.8)'
-    ctx.beginPath()
-
-    // Initial dot on the coordinates
-    const { x, y } = orderedVertices[0]
-    ctx.moveTo(x * widthInterval, -(y * heightInterval))
-
-    // Iterate all coordinates and draw a line between them
-    orderedVertices.forEach(interval => {
-      const { x, y } = interval
-      ctx.lineTo(x * widthInterval, -(y * heightInterval))
-    })
-    // Close and fill path
-    ctx.closePath()
-    ctx.fill()
-
     // Graph point of intersections
-    orderedVertices.forEach(inter => {
+    vertices.forEach(inter => {
       ctx.fillStyle = 'rgb(255,0,0)'
       ctx.strokeStyle = 'rgb(255,128,0)'
       ctx.beginPath()
