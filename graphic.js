@@ -45,12 +45,21 @@ export class Graph {
    * Draws the graph
    */
   draw () {
+    const { ctx, fWunit, width, height, fHunit } = this
     // Restore origin so I can clear the canvas like a human being
-    this.ctx.restore()
-    this.ctx.clearRect(0, 0, this.width, this.height)
+    ctx.restore()
+    ctx.clearRect(0, 0, width, height)
+
+    // Save state before translating origin
+    ctx.save()
+
+    // Traslate origin coordinate to right-bottom side
+    // with an space for tags of 1em
+    ctx.translate(fWunit, height - fHunit)
+
     this.initPlot()
     this.drawGrid()
-    this.data.lines.forEach(line => this.drawRestriction(line))
+    this.data.lines.forEach((line, i) => this.drawRestriction(line, i + 1))
     this.graphChart(this.data.vertices)
   }
 
@@ -59,13 +68,6 @@ export class Graph {
    */
   initPlot () {
     const { ctx, fWunit, width, height, fHunit } = this
-
-    // save state before translating origin
-    ctx.save()
-
-    // Traslate origin coordinate to right-bottom side
-    // with an space for tags of 1em
-    ctx.translate(fWunit, height - fHunit)
 
     // Prepare lines color and width
     ctx.strokeStyle = 'rgb(0,0,0)'
@@ -142,11 +144,13 @@ export class Graph {
    * Draws a restriction on the graph
    * @param {RestrictionLine} restriction
    */
-  drawRestriction (restriction) {
+  drawRestriction (restriction, i) {
     const { ctx, width, height, gcd } = this
     const { x1, y1, x2, y2, d } = restriction
     const widthInterval = this.widthInterval / gcd
     const heightInterval = this.heightInterval / gcd
+
+    const [transparentColor, color] = getRandomRgbColor(0.25)
 
     // Draw function line
     ctx.strokeStyle = 'rgb(0,0,0,1)'
@@ -155,8 +159,15 @@ export class Graph {
     ctx.lineTo(x2 * widthInterval, -(y2 * heightInterval))
     ctx.stroke()
 
+    const midPoint = calcMidPoint(
+      x1 * widthInterval,
+      -(y1 * heightInterval),
+      x2 * widthInterval,
+      -(y2 * heightInterval)
+    )
+
     // Draw accepted plane
-    ctx.fillStyle = 'rgb(0,0,0,0.3)'
+    ctx.fillStyle = transparentColor
     ctx.beginPath()
     ctx.moveTo(x1 * widthInterval, -(y1 * heightInterval))
     ctx.lineTo(x2 * widthInterval, -(y2 * heightInterval))
@@ -173,26 +184,32 @@ export class Graph {
 
     ctx.closePath()
     ctx.fill()
+
+    // Write restriction tag
+    ctx.fillStyle = 'rgb(0,0,0,1)'
+    ctx.fillText(`Restricción ${i}`, midPoint[1] + 4, midPoint[0] - 4)
   }
 
-  graphChart (vectors = []) {
+  graphChart (vertices = []) {
+    const orderedVertices = [...vertices]
+
     // Sort objects in array
-    vectors.sort((a, b) => a.x - b.x + a.y + b.y)
+    orderedVertices.sort((a, b) => a.x - b.x + a.y + b.y)
 
     const { ctx, gcd } = this
     const widthInterval = this.widthInterval / gcd
     const heightInterval = this.heightInterval / gcd
 
     // Add style things
-    ctx.fillStyle = 'rgb(255,128,0,0.7)'
+    ctx.fillStyle = 'rgb(255,128,0,0.8)'
     ctx.beginPath()
 
     // Initial dot on the coordinates
-    const { x, y } = vectors[0]
+    const { x, y } = orderedVertices[0]
     ctx.moveTo(x * widthInterval, -(y * heightInterval))
 
     // Iterate all coordinates and draw a line between them
-    vectors.forEach(interval => {
+    orderedVertices.forEach(interval => {
       const { x, y } = interval
       ctx.lineTo(x * widthInterval, -(y * heightInterval))
     })
@@ -201,9 +218,9 @@ export class Graph {
     ctx.fill()
 
     // Graph point of intersections
-    vectors.forEach(inter => {
-      ctx.fillStyle = 'rgb(255,0,0,0.8)'
-      ctx.strokeStyle = 'rgb(255,128,0,0.8)'
+    orderedVertices.forEach(inter => {
+      ctx.fillStyle = 'rgb(255,0,0)'
+      ctx.strokeStyle = 'rgb(255,128,0)'
       ctx.beginPath()
       ctx.arc(
         inter.x * widthInterval,
@@ -215,6 +232,13 @@ export class Graph {
       )
       ctx.fill()
       ctx.stroke()
+
+      ctx.fillStyle = 'rgb(0,0,0)'
+      ctx.fillText(
+        `(${inter.x}, ${inter.y})`,
+        inter.x * widthInterval + 4,
+        -(inter.y * heightInterval + 4)
+      )
     })
   }
 }
@@ -251,13 +275,14 @@ const greatestCommonDivisor = (a, b) => {
 
 /**
  * Generates a random RGB color
+ * @param {number} opacity a number from 0 to 1
  * @returns A string representing a RGB color
  */
-const getRandomRgbColor = () => {
+const getRandomRgbColor = (opacity = 1) => {
   const r = Math.random() * 255
   const g = Math.random() * 255
   const b = Math.random() * 255
-  return `rgb(${r}, ${g}, ${b})`
+  return [`rgb(${r}, ${g}, ${b}, ${opacity})`, `rgb(${r}, ${g}, ${b})`]
 }
 
 /**
@@ -280,6 +305,18 @@ function maxMax (array, a, b) {
     }
   }
   return [maxA, maxB]
+}
+
+/**
+ * Calculates the mid point between two points
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ * @returns Mid point between the points
+ */
+function calcMidPoint (x1, x2, y1, y2) {
+  return [(x1 + x2) / 2, (y1 + y2) / 2]
 }
 
 export { greatestCommonDivisor, getRandomRgbColor, getFontSize, maxMax }
