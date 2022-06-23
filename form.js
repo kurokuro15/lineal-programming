@@ -48,13 +48,17 @@ let restrictionCount = 0
  * @type {Data}
  * {@link Data}
  */
-const data = {
+let data = {
   equations: []
 }
 
 // procesa los datos del form al escuchar el evento submit
 function initByEvent (event) {
   event?.preventDefault()
+
+  data = {
+    equations: []
+  }
   const form = Object.fromEntries(new FormData(event.target || window.form))
   // mapping data from form to data
   Object.keys(form).forEach(key => {
@@ -74,6 +78,8 @@ function initByEvent (event) {
         break
     }
   })
+
+  data.equations = data.equations.filter(e => e)
 
   // Calculamos toh acá :V
   calculatePL(data)
@@ -210,30 +216,27 @@ function addRestriction (removable = false) {
   `
 
   if (removable) {
-    restriction.innerHTML += `
-      <div class="col-1">
-        <button
-          type="button"
-          class="btn btn-outline-danger"
-          id="btn-delete-restriction-${restrictionCount}"
-        >X</button>
-      </div>
+    const deleteButton = document.createElement('div')
+    deleteButton.className = 'col-1'
+    deleteButton.innerHTML = `
+      <button
+        type="button"
+        class="btn btn-outline-danger"
+      >X</button>
     `
+
+    // eliminar la row al hacer clic en el botón de eliminar restricción
+    deleteButton.addEventListener('click', evt => {
+      container.removeChild(evt.target.parentElement.parentElement)
+      restrictionCount -= 1
+    })
+
+    restriction.appendChild(deleteButton)
   } else {
     restriction.innerHTML += '<div class="col-1" />'
   }
 
   container.appendChild(restriction)
-
-  const deleteButton = document.querySelector(
-    `#btn-delete-restriction-${restrictionCount}`
-  )
-
-  // eliminar la row al hacer clic en el botón de eliminar restricción
-  deleteButton?.addEventListener('click', evt => {
-    container.removeChild(evt.target.parentElement.parentElement)
-    restrictionCount -= 1
-  })
 
   restrictionCount += 1
 }
