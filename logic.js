@@ -36,7 +36,7 @@
  * @property {number} z
  */
 
-/*constantes, "ecuaciones" que representan el corte con el eje X y el eje Y de la gráfica*/
+/* constantes, "ecuaciones" que representan el corte con el eje X y el eje Y de la gráfica */
 /**
  * @type {Equation}
  * {@link Equation}
@@ -51,7 +51,7 @@ const y = { a: 0, b: 1, c: 0, i: 770, d: 1 }
  * @type {Array<Equation>}
  * {@link Equation} Array of Equations
  */
-const ejes = [x, y]
+const axes = [x, y]
 /**
  * Función de emparejamiento, recorre el arreglo las veces necesarias
  * para emparejar los elementos de la matriz al una sola vez
@@ -84,7 +84,7 @@ function coorValidation (conditions, x, y) {
     const { a, b, c, d } = el
     const operation = round(a * x + b * y)
     const equalities = {
-      0: operation == c,
+      0: operation === c,
       1: operation >= c,
       2: operation <= c
     }
@@ -118,7 +118,7 @@ function getIntersections (equations) {
  */
 function resolveFnObjective (objFunction, equations) {
   const vertices = []
-  const intersections = getIntersections([...equations, ...ejes])
+  const intersections = getIntersections([...equations, ...axes])
   intersections.forEach(coordinate => {
     const { x, y } = coordinate
     const { a, b } = objFunction
@@ -130,36 +130,7 @@ function resolveFnObjective (objFunction, equations) {
 }
 
 function round (number) {
-  return Math.round(number * 100) / 100
+  return Number(number.toFixed(2))
 }
 
-function resolveProblem (objFn, restrictions, maximize) {
-  const { result, intersections } = resolveFnObjective(objFn, [
-    ...restrictions,
-    ...ejes
-  ])
-  if (maximize) {
-    result.sort((a, b) => b.z - a.z)
-  } else {
-    result.sort((a, b) => a.z - b.z)
-  }
-  const coordinates = intersections
-    .map(equation => {
-      if (equation.i < 200) {
-        return undefined
-      }
-      return equation
-    })
-    .filter(e => e !== undefined)
-  return { result, coordinates }
-}
-
-export {
-  resolveProblem,
-  resolveFnObjective,
-  getIntersections,
-  pairing,
-  coorValidation,
-  round,
-  ejes
-}
+export { resolveFnObjective, getIntersections, axes }

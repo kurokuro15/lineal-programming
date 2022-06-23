@@ -34,11 +34,12 @@ export class Graph {
 
     // Calc width and height units
     ;[this.maxX, this.maxY] = maxMax(data.lines, 'x2', 'y1')
-    this.gcd = greatestCommonDivisor(this.maxX, this.maxY)
-    this.wUnit = this.maxX / this.gcd
-    this.hUnit = this.maxY / this.gcd
-    this.heightInterval = (this.height - this.fHunit) / (this.hUnit + 1)
-    this.widthInterval = (this.width - this.fWunit) / (this.wUnit + 1)
+    const marginUnits = 25
+    this.xStepSize = getStepSize(8, 0, this.maxX + marginUnits)
+    this.yStepSize = getStepSize(8, 0, this.maxY + marginUnits)
+
+    this.wUnit = (this.width - this.fWunit) / (this.maxX + marginUnits)
+    this.hUnit = (this.height - this.fHunit) / (this.maxY + marginUnits)
 
     // Redraw graph on window resize
     window.addEventListener('resize', () => {
@@ -66,7 +67,7 @@ export class Graph {
 
     this.initPlot()
     this.drawGrid()
-    this.data.lines.forEach((line, i) => this.drawRestriction(line, i + 1))
+    this.data.lines.forEach((line, i) => this.drawRestriction(line, i))
     this.data.lines.forEach((line, i) => this.drawRestrictionTag(line, i))
     this.drawVertices(this.data.vertices)
   }
@@ -75,7 +76,7 @@ export class Graph {
    * Initializes the plot drawing the axes
    */
   initPlot () {
-    const { ctx, width, height, fHunit } = this
+    const { ctx, width, height } = this
 
     // Prepare lines color and width
     ctx.strokeStyle = 'rgb(0,0,0)'
@@ -83,7 +84,7 @@ export class Graph {
 
     // Draw X/Y axes
     ctx.beginPath()
-    ctx.moveTo(0, -height + fHunit)
+    ctx.moveTo(0, -height)
     ctx.lineTo(0, 0)
     ctx.lineTo(width, 0)
     ctx.stroke()
@@ -99,9 +100,10 @@ export class Graph {
       height,
       fWunit,
       fHunit,
-      widthInterval,
-      heightInterval,
-      gcd
+      wUnit,
+      hUnit,
+      yStepSize,
+      xStepSize
     } = this
 
     // prepare lines color and width
@@ -116,15 +118,14 @@ export class Graph {
 
     // Horizontal lines for Y axis
     ctx.beginPath()
-    for (let i = 0; i > -height; i -= heightInterval) {
+    for (
+      let i = 0, j = 0;
+      i > -height;
+      i -= hUnit * yStepSize, j += yStepSize
+    ) {
       ctx.moveTo(0, i)
       ctx.lineTo(width, i)
-      ctx.fillText(
-        Math.abs((i / heightInterval) * gcd).toFixed(),
-        x,
-        i + hLineMiddle,
-        fWunit
-      )
+      ctx.fillText(Math.abs(j), x, i + hLineMiddle, fWunit)
     }
     ctx.stroke()
 
@@ -135,15 +136,10 @@ export class Graph {
     const y = fHunit / 2
     // Vertical lines for x axis
     ctx.beginPath()
-    for (let i = 0; i < width; i += widthInterval) {
+    for (let i = 0, j = 0; i < width; i += wUnit * xStepSize, j += xStepSize) {
       ctx.moveTo(i, 0)
       ctx.lineTo(i, -height)
-      ctx.fillText(
-        Math.abs((i / widthInterval) * gcd).toFixed(),
-        i - vLineMiddle,
-        y + fHunit / 2,
-        fWunit
-      )
+      ctx.fillText(Math.abs(j), i - vLineMiddle, y + fHunit / 2, fWunit)
     }
     ctx.stroke()
   }
@@ -151,31 +147,30 @@ export class Graph {
   /**
    * Draws a restriction on the graph
    * @param {RestrictionLine} restriction
+   * @param {number} i Restriction index
    */
   drawRestriction (restriction, i) {
-    const { ctx, width, height, gcd } = this
+    const { ctx, width, height, wUnit, hUnit } = this
     const { x1, y1, x2, y2, d } = restriction
-    const widthInterval = this.widthInterval / gcd
-    const heightInterval = this.heightInterval / gcd
 
-    const [color, transparentColor] = colors[i - 1]
+    const [color, transparentColor] = colors[i]
 
     // Draw function line
     ctx.strokeStyle = color
     ctx.beginPath()
-    ctx.moveTo(x1 * widthInterval, -(y1 * heightInterval))
-    ctx.lineTo(x2 * widthInterval, -(y2 * heightInterval))
+    ctx.moveTo(x1 * wUnit, -(y1 * hUnit))
+    ctx.lineTo(x2 * wUnit, -(y2 * hUnit))
     ctx.stroke()
 
     // Draw accepted plane
     ctx.fillStyle = transparentColor
     ctx.beginPath()
-    ctx.moveTo(x1 * widthInterval, -(y1 * heightInterval))
-    ctx.lineTo(x2 * widthInterval, -(y2 * heightInterval))
+    ctx.moveTo(x1 * wUnit, -(y1 * hUnit))
+    ctx.lineTo(x2 * wUnit, -(y2 * hUnit))
 
-    if (d == 2) {
+    if (d === 2) {
       ctx.lineTo(0, 0)
-    } else if (d == 1) {
+    } else if (d === 1) {
       ctx.lineTo(width, 0)
       ctx.lineTo(width, -height)
       ctx.lineTo(0, -height)
@@ -190,19 +185,17 @@ export class Graph {
   /**
    * Draws a given restriction's tag
    * @param {RestrictionLine} restriction
-   * @param {number} i
+   * @param {number} i Restriction index
    */
   drawRestrictionTag (restriction, i) {
-    const { ctx } = this
+    const { ctx, wUnit, hUnit } = this
     const { x1, y1, x2, y2 } = restriction
-    const widthInterval = this.widthInterval / this.gcd
-    const heightInterval = this.heightInterval / this.gcd
 
     const midPoint = calcMidPoint(
-      x1 * widthInterval,
-      -(y1 * heightInterval),
-      x2 * widthInterval,
-      -(y2 * heightInterval)
+      x1 * wUnit,
+      -(y1 * hUnit),
+      x2 * wUnit,
+      -(y2 * hUnit)
     )
 
     const [color] = colors[i]
@@ -217,23 +210,14 @@ export class Graph {
    * @param {Array<ResultVertex>} vertices
    */
   drawVertices (vertices = []) {
-    const { ctx, gcd } = this
-    const widthInterval = this.widthInterval / gcd
-    const heightInterval = this.heightInterval / gcd
+    const { ctx, wUnit, hUnit } = this
 
     // Graph point of intersections
     vertices.forEach(inter => {
       ctx.fillStyle = 'rgb(255,0,0)'
       ctx.strokeStyle = 'rgb(255,128,0)'
       ctx.beginPath()
-      ctx.arc(
-        inter.x * widthInterval,
-        -(inter.y * heightInterval),
-        4,
-        0,
-        2 * Math.PI,
-        false
-      )
+      ctx.arc(inter.x * wUnit, -(inter.y * hUnit), 4, 0, 2 * Math.PI, false)
       ctx.fill()
       ctx.stroke()
 
@@ -241,8 +225,8 @@ export class Graph {
       ctx.fillStyle = 'rgb(0,0,0)'
       ctx.fillText(
         `(${inter.x}, ${inter.y})`,
-        inter.x * widthInterval + 4,
-        -(inter.y * heightInterval + 4)
+        inter.x * wUnit + 4,
+        -(inter.y * hUnit + 4)
       )
     })
   }
@@ -259,40 +243,6 @@ function getFontSize () {
       .getPropertyValue('font-size')
       .match(/\d+/)[0]
   )
-}
-
-/**
- * Calculates the GCD between two numbers
- * @param {number} a
- * @param {number} b
- * @returns GCD
- */
-const greatestCommonDivisor = (a, b) => {
-  // https://parzibyte.me/blog
-  let temporal //Para no perder b
-  while (b !== 0) {
-    temporal = b
-    b = a % b
-    a = temporal
-  }
-  return a
-}
-
-const gcd = (...arr) => {
-  const _gcd = (x, y) => (!y ? x : gcd(y, x % y))
-  return [...arr].reduce((a, b) => _gcd(Math.abs(a), Math.abs(b)))
-}
-
-/**
- * Generates a random RGB color
- * @param {number} opacity a number from 0 to 1
- * @returns A string representing a RGB color
- */
-const getRandomRgbColor = (opacity = 1) => {
-  const r = Math.random() * 255
-  const g = Math.random() * 255
-  const b = Math.random() * 255
-  return [`rgb(${r}, ${g}, ${b}, ${opacity})`, `rgb(${r}, ${g}, ${b})`]
 }
 
 /**
@@ -329,4 +279,39 @@ function calcMidPoint (x1, x2, y1, y2) {
   return [(x1 + x2) / 2, (y1 + y2) / 2]
 }
 
-export { greatestCommonDivisor, getRandomRgbColor, getFontSize, maxMax }
+/**
+ *
+ * @param {number} steps Desired steps
+ * @param {number} min Minimum value of the range
+ * @param {number} max Maximum value of the range
+ * @returns The optimal step size
+ */
+function getStepSize (steps, min, max) {
+  const oMin = min
+  const oMax = max
+  const desiredSteps = steps
+  const range = max - min
+
+  // find magnitude and steps in powers of 10
+  const step = range / steps
+  const mag10 = Math.ceil(Math.log(step) / Math.log(10))
+  const baseStepSize = Math.pow(10, mag10)
+
+  const trySteps = [5, 4, 2, 1]
+  let stepSize
+
+  for (let i = 0; i < trySteps.length; i++) {
+    stepSize = baseStepSize / trySteps[i]
+    const ns = Math.round(range / stepSize)
+    // bail if anything didn't work, We can't check float.ZeroTolernace anywhere since we should
+    // work on arbitrary range values
+    if (isNaN(baseStepSize) || isNaN(ns) || ns < 1) return
+
+    min = Math.floor(oMin / stepSize) * stepSize
+    max = Math.ceil(oMax / stepSize) * stepSize
+    steps = parseInt(Math.round((max - min) / stepSize))
+
+    if (steps <= desiredSteps) break
+  }
+  return stepSize
+}

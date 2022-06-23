@@ -1,6 +1,6 @@
 // imports
 import { Graph } from './graphic.js'
-import { ejes, getIntersections, resolveFnObjective } from './logic.js'
+import { axes, getIntersections, resolveFnObjective } from './logic.js'
 /**
  * @typedef {import('./logic.js').Data} Data
  */
@@ -13,8 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
   container = document.querySelector('#restrictions-container')
   form = document.querySelector('#problem-form')
   form.addEventListener('submit', initByEvent)
+
   addRestriction()
   addRestriction()
+
   canvas = document.querySelector('#graph')
   canvas.width =
     canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetWidth
@@ -26,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas.height =
       canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
   })
+
   document
     .querySelector('#btn-add-restriction')
     .addEventListener('click', () => {
@@ -54,7 +57,7 @@ let data = {
 
 // procesa los datos del form al escuchar el evento submit
 function initByEvent (event) {
-  event?.preventDefault()
+  event.preventDefault()
 
   data = {
     equations: []
@@ -89,11 +92,11 @@ function initByEvent (event) {
 function calculatePL (data) {
   const { objFn, equations, maximize } = data
 
-  const axisIntersections = getIntersections([...equations, ...ejes]).filter(
+  const axisIntersections = getIntersections([...equations, ...axes]).filter(
     x => x.i2 > 100
   )
 
-  let lines = []
+  const lines = []
   for (let i = 0; i < axisIntersections.length; i += 2) {
     const { x: x1, y: y1, d } = axisIntersections[i]
     const { x: x2, y: y2 } = axisIntersections[i + 1]
@@ -101,13 +104,14 @@ function calculatePL (data) {
   }
 
   const { vertices } = resolveFnObjective(objFn, equations)
+
   if (maximize) {
     vertices.sort((a, b) => b.z - a.z)
   } else {
     vertices.sort((a, b) => a.z - b.z)
   }
 
-  const graph = new Graph(canvas, { lines, vertices })
+  new Graph(canvas, { lines, vertices })
 
   showResults(vertices, maximize)
 }
