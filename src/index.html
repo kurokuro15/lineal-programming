@@ -11,7 +11,7 @@
       integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
       crossorigin="anonymous"
     />
-    <script type="module" src="./form.js"></script>
+    <script type="module" src="./js/form.js"></script>
   </head>
   <body>
     <div class="container my-3">
@@ -28,9 +28,7 @@
           <div class="col mb-4">
             <form id="problem-form">
               <div class="row mb-3 align-items-center">
-                <label class="col-4 col-form-label fw-bold">
-                  Función objetivo:
-                </label>
+                <label class="col-4 col-form-label fw-bold"> Función objetivo: </label>
                 <div class="col">
                   <div class="row gx-2 align-items-center">
                     <div class="col-auto">Z(X,Y) =</div>
@@ -92,11 +90,7 @@
                   </button>
                 </div>
                 <div class="col-auto">
-                  <button
-                    type="submit"
-                    form="problem-form"
-                    class="btn btn-primary"
-                  >
+                  <button type="submit" form="problem-form" class="btn btn-primary">
                     Resolver
                   </button>
                 </div>
@@ -112,7 +106,7 @@
 
         <hr />
 
-        <div class="col" id="results-container" style="display: none;">
+        <div class="col" id="results-container" style="display: none">
           <h3>Puntos factibles</h3>
           <div id="results" class="d-flex flex-column"></div>
         </div>

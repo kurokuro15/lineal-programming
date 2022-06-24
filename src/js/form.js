@@ -1,19 +1,50 @@
 // imports
-import { Graph } from './graphic.js'
+import Graph from './graphic.js'
 import { axes, getIntersections, resolveFnObjective } from './logic.js'
 /**
  * @typedef {import('./logic.js').Data} Data
  */
 
-// selector de elementos
+/* ###################################################################################### */
+/* ######## Declaración de constantes y selectores para la manipulación de la UI ######## */
+/* ###################################################################################### */
+
+/**
+ * Constantes
+ */
+
+const mathExpPattern =
+  '\\s*[-+]?(\\(*\\s*\\d+([.,]\\d+)?\\s*\\)*\\s*([-+/*]\\s*\\(*\\s*\\d+([.,]\\d+)?\\s*\\)*\\s*)*)'
+/**
+ * Variables mutables
+ */
+
+// counter de restricciones
+let restrictionCount = 0
+
+/**
+ * Global Data Object
+ * @type {Data}
+ * {@link Data}
+ */
+let data = {
+  equations: []
+}
+
+/**
+ * Selectores del DOM
+ */
+let canvas = ''
 let container = ''
 let form = ''
-let canvas = ''
+
+/**
+ * Listener de eventos del DOM, una vez cargado se ejecuta el código
+ */
 document.addEventListener('DOMContentLoaded', () => {
   container = document.querySelector('#restrictions-container')
   form = document.querySelector('#problem-form')
   form.addEventListener('submit', initByEvent)
-
   addRestriction()
   addRestriction()
 
@@ -29,40 +60,33 @@ document.addEventListener('DOMContentLoaded', () => {
       canvas.parentElement.parentElement.previousElementSibling.firstElementChild.offsetHeight
   })
 
-  document
-    .querySelector('#btn-add-restriction')
-    .addEventListener('click', () => {
-      if (restrictionCount < 4) {
-        addRestriction(true)
-      } else {
-        alert('Máximo 4 restricciones')
-      }
-    })
+  document.querySelector('#btn-add-restriction').addEventListener('click', () => {
+    if (restrictionCount < 4) {
+      addRestriction(true)
+    } else {
+      alert('Máximo 4 restricciones')
+    }
+  })
 })
 
-const mathExpPattern =
-  '\\s*[-+]?(\\(*\\s*\\d+([.,]\\d+)?\\s*\\)*\\s*([-+/*]\\s*\\(*\\s*\\d+([.,]\\d+)?\\s*\\)*\\s*)*)'
-
-// counter de restricciones
-let restrictionCount = 0
+/* ####################################################################################### */
+/* Declaración de funciones para la manipulación de la UI y cálculo de Programación Lineal */
+/* ####################################################################################### */
 
 /**
- * Global Data Object
- * @type {Data}
- * {@link Data}
+ * Función para procesar los datos del formulario al escuchar el evento submit
+ * @param {Event} event
  */
-let data = {
-  equations: []
-}
-
-// procesa los datos del form al escuchar el evento submit
-function initByEvent (event) {
+function initByEvent(event) {
   event.preventDefault()
 
+  // 'clean' data object
   data = {
     equations: []
   }
+  // get data input from form
   const form = Object.fromEntries(new FormData(event.target || window.form))
+
   // mapping data from form to data
   Object.keys(form).forEach(key => {
     const [type, index, prop] = key.split('-')
@@ -84,12 +108,16 @@ function initByEvent (event) {
 
   data.equations = data.equations.filter(e => e)
 
-  // Calculamos toh acá :V
+  // We go to the next step
   calculatePL(data)
 }
 
-// Esta es para calcular la vida entera :v
-function calculatePL (data) {
+/**
+ * Función para hacer el cálculo de Programación Lineal
+ * a través del método gráfico
+ * @param {Data} data
+ */
+function calculatePL(data) {
   const { objFn, equations, maximize } = data
 
   const axisIntersections = getIntersections([...equations, ...axes]).filter(
@@ -97,6 +125,7 @@ function calculatePL (data) {
   )
 
   const lines = []
+
   for (let i = 0; i < axisIntersections.length; i += 2) {
     const { x: x1, y: y1, d } = axisIntersections[i]
     const { x: x2, y: y2 } = axisIntersections[i + 1]
@@ -111,16 +140,18 @@ function calculatePL (data) {
     vertices.sort((a, b) => a.z - b.z)
   }
 
+  // draw graph
   new Graph(canvas, { lines, vertices })
 
+  // render results in UI
   showResults(vertices, maximize)
 }
 
 /**
- * Muestra los resultados de la operación en la página
+ * Función para renderizar los resultados de la operación en la página
  * @param {Array<Result>} results
  */
-function showResults (results, maximize) {
+function showResults(results, maximize) {
   const resultsWrapper = document.getElementById('results-container')
   resultsWrapper.style = ''
 
@@ -133,10 +164,12 @@ function showResults (results, maximize) {
 
     const resultRow = document.createElement('div')
     resultRow.className = 'row'
+    let first = i === 0 ? 'bg-success bg-opacity-50' : ''
+
     resultRow.innerHTML = `
-        <div class='col col-2'>${rowNumber}) (${x}, ${y})</div>
-        <div class='col col-auto'><div class='vr'></div></div>
-        <div class='col col-auto'>Z(${x}, ${y}) = ${z}</div>
+        <div class='col col-2 ${first}'>${rowNumber}) (${x}, ${y})</div>
+        <div class='col col-auto ${first}'><div class='vr'></div></div>
+        <div class='col col-auto ${first}'>Z(${x}, ${y}) = ${z}</div>
     `
 
     resultsContainer.appendChild(resultRow)
@@ -146,27 +179,20 @@ function showResults (results, maximize) {
 
   const bestResultMsg = document.createElement('div')
   bestResultMsg.className = 'col col-auto text-success'
-  bestResultMsg.textContent = `<-- Este punto ${operationText} la función objetivo`
+  bestResultMsg.textContent = `←   Este punto ${operationText} la función objetivo`
   resultsContainer.firstElementChild.appendChild(bestResultMsg)
 }
 
 /**
- * Elimina los nodos hijos de un elemento dado
- * @param {HTMLElement} element
+ * Función para añadir campos de restricciones al formulario.
+ * Máximo 4 restricciones.
+ * @param {Boolean} removable
  */
-function deleteChilds (element) {
-  while (element.childElementCount > 0) {
-    element.removeChild(element.firstChild)
-  }
-}
-
-// agregar restricciones
-function addRestriction (removable = false) {
+function addRestriction(removable = false) {
   const restriction = document.createElement('div')
   restriction.className = 'row gx-2 align-items-center mb-3'
   restriction.innerHTML = `
     <div class="col-auto">(${restrictionCount + 1})</div>
-
     <div class="col">
       <div class="input-group">
         <input
@@ -179,9 +205,7 @@ function addRestriction (removable = false) {
         <span class="input-group-text">X</span>
       </div>
     </div>
-
     <div class="col-auto">+</div>
-
     <div class="col">
       <div class="input-group">
         <input
@@ -194,14 +218,12 @@ function addRestriction (removable = false) {
         <span class="input-group-text">Y</span>
       </div>
     </div>
-
     <div class="col-auto">
       <select class="form-select" name="r-${restrictionCount}-d" id="r-${restrictionCount}-d required">
         <option value="2">≤</option>
         <option value="1">≥</option>
       </select>
     </div>
-
     <div class="col">
       <input
         class="form-control"
@@ -211,7 +233,6 @@ function addRestriction (removable = false) {
         pattern="${mathExpPattern}"
       />
     </div>
-
     <input
       name="r-${restrictionCount}-i"
       value="${restrictionCount + 1}"
@@ -234,13 +255,21 @@ function addRestriction (removable = false) {
       container.removeChild(evt.target.parentElement.parentElement)
       restrictionCount -= 1
     })
-
     restriction.appendChild(deleteButton)
   } else {
     restriction.innerHTML += '<div class="col-1" />'
   }
 
   container.appendChild(restriction)
-
   restrictionCount += 1
+}
+
+/**
+ * Elimina los nodos hijos de un elemento dado
+ * @param {HTMLElement} element
+ */
+function deleteChilds(element) {
+  while (element.childElementCount > 0) {
+    element.removeChild(element.firstChild)
+  }
 }

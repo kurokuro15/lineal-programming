@@ -3,6 +3,13 @@
  * @typedef {import('./logic.js').RestrictionLine} RestrictionLine
  */
 
+/* ###################################################################################### */
+/* ######### Declaración de constante para la creación de gráficos en el canvas ######### */
+/* ###################################################################################### */
+
+/**
+ * @type {string[]} Array de colores para la graficación de las restricciones
+ */
 const colors = [
   ['rgb(2, 48, 71)', 'rgb(2, 48, 71, 0.2)'],
   ['rgb(214, 40, 40)', 'rgb(247, 127, 0, 0.2)'],
@@ -10,15 +17,103 @@ const colors = [
   ['rgb(97, 19, 205)', 'rgb(127, 50, 236, 0.2)']
 ]
 
-export class Graph {
+/* ###################################################################################### */
+/* ######### Declaración de funciones para la creación de gráficos en el canvas ######### */
+/* ###################################################################################### */
+
+/**
+ * Función para obtener el 'font-size' en píxeles del css global
+ * @returns Font size
+ */
+function getFontSize() {
+  return Number(
+    window.getComputedStyle(document.body).getPropertyValue('font-size').match(/\d+/)[0]
+  )
+}
+
+/**
+ * Función para obtener el valor máximo de dos propiedades de un array de objetos
+ * @param {Array<object>} array
+ * @param {string} a
+ * @param {string} b
+ * @returns An array with the max of two properties of an object array
+ */
+function maxMax(array, a, b) {
+  let length = array.length
+  let maxA = array[length - 1][a]
+  let maxB = array[length - 1][b]
+  while (length--) {
+    if (array[length][a] > maxA) {
+      maxA = array[length][a]
+    }
+    if (array[length][b] > maxB) {
+      maxB = array[length][b]
+    }
+  }
+  return [maxA, maxB]
+}
+
+/**
+ * Función para calcular el medio entre dos coordenadas
+ * @param {number} x1
+ * @param {number} x2
+ * @param {number} y1
+ * @param {number} y2
+ * @returns Mid point between the points
+ */
+function calcMidPoint(x1, x2, y1, y2) {
+  return [(x1 + x2) / 2, (y1 + y2) / 2]
+}
+
+/**
+ * Función para calcular el intervalo a utilizar en el plano carteciano
+ * @param {number} steps Desired steps
+ * @param {number} min Minimum value of the range
+ * @param {number} max Maximum value of the range
+ * @returns The optimal step size
+ */
+function getStepSize(steps, min, max) {
+  const oMin = min
+  const oMax = max
+  const desiredSteps = steps
+  const range = max - min
+
+  // find magnitude and steps in powers of 10
+  const step = range / steps
+  const mag10 = Math.ceil(Math.log(step) / Math.log(10))
+  const baseStepSize = Math.pow(10, mag10)
+
+  const trySteps = [5, 4, 2, 1]
+  let stepSize
+
+  for (let i = 0; i < trySteps.length; i++) {
+    stepSize = baseStepSize / trySteps[i]
+    const ns = Math.round(range / stepSize)
+    // bail if anything didn't work, We can't check float.ZeroTolernace anywhere since we should
+    // work on arbitrary range values
+    if (isNaN(baseStepSize) || isNaN(ns) || ns < 1) return
+
+    min = Math.floor(oMin / stepSize) * stepSize
+    max = Math.ceil(oMax / stepSize) * stepSize
+    steps = parseInt(Math.round((max - min) / stepSize))
+
+    if (steps <= desiredSteps) break
+  }
+  return stepSize
+}
+
+/* ###################################################################################### */
+/* ######## Declaración de la clase principal controladora del canvas y graficos ######## */
+/* ###################################################################################### */
+export default class Graph {
   /**
-   * Creates a new Graph object
+   * Clase para crear el gráfico y manejar el canvas
    * @param {HTMLCanvasElement} canvas
    * @param {object} data The data to be plotted
    * @param {Array<RestrictionLine>} data.lines
    * @param {Array<ResultVertex>} data.vertices
    */
-  constructor (canvas, data) {
+  constructor(canvas, data) {
     this.ctx = canvas.getContext('2d')
     this.width = canvas.width
     this.height = canvas.height
@@ -50,9 +145,9 @@ export class Graph {
   }
 
   /**
-   * Draws the graph
+   * Dibuja el plano cartesiano
    */
-  draw () {
+  draw() {
     const { ctx, fWunit, width, height, fHunit } = this
     // Restore origin so I can clear the canvas like a human being
     ctx.restore()
@@ -73,9 +168,9 @@ export class Graph {
   }
 
   /**
-   * Initializes the plot drawing the axes
+   * Inicia el trazado de los ejes XY
    */
-  initPlot () {
+  initPlot() {
     const { ctx, width, height } = this
 
     // Prepare lines color and width
@@ -91,20 +186,12 @@ export class Graph {
   }
 
   /**
-   * Draws the grid based on the calculated units
+   * Dibuja la cuadrícula de fondo basada en
+   * las unidades calculadas
    */
-  drawGrid () {
-    const {
-      ctx,
-      width,
-      height,
-      fWunit,
-      fHunit,
-      wUnit,
-      hUnit,
-      yStepSize,
-      xStepSize
-    } = this
+  drawGrid() {
+    const { ctx, width, height, fWunit, fHunit, wUnit, hUnit, yStepSize, xStepSize } =
+      this
 
     // prepare lines color and width
     ctx.strokeStyle = 'rgb(0,0,0,0.4)'
@@ -118,11 +205,7 @@ export class Graph {
 
     // Horizontal lines for Y axis
     ctx.beginPath()
-    for (
-      let i = 0, j = 0;
-      i > -height;
-      i -= hUnit * yStepSize, j += yStepSize
-    ) {
+    for (let i = 0, j = 0; i > -height; i -= hUnit * yStepSize, j += yStepSize) {
       ctx.moveTo(0, i)
       ctx.lineTo(width, i)
       ctx.fillText(Math.abs(j), x, i + hLineMiddle, fWunit)
@@ -145,11 +228,11 @@ export class Graph {
   }
 
   /**
-   * Draws a restriction on the graph
+   * Traza una restricción pasada por parámetros en el plano cartesiano
    * @param {RestrictionLine} restriction
    * @param {number} i Restriction index
    */
-  drawRestriction (restriction, i) {
+  drawRestriction(restriction, i) {
     const { ctx, width, height, wUnit, hUnit } = this
     const { x1, y1, x2, y2, d } = restriction
 
@@ -183,20 +266,16 @@ export class Graph {
   }
 
   /**
-   * Draws a given restriction's tag
+   * Traza la etiqueta de una restricción
+   * pasada por parámetro
    * @param {RestrictionLine} restriction
    * @param {number} i Restriction index
    */
-  drawRestrictionTag (restriction, i) {
+  drawRestrictionTag(restriction, i) {
     const { ctx, wUnit, hUnit } = this
     const { x1, y1, x2, y2 } = restriction
 
-    const midPoint = calcMidPoint(
-      x1 * wUnit,
-      -(y1 * hUnit),
-      x2 * wUnit,
-      -(y2 * hUnit)
-    )
+    const midPoint = calcMidPoint(x1 * wUnit, -(y1 * hUnit), x2 * wUnit, -(y2 * hUnit))
 
     const [color] = colors[i]
 
@@ -206,10 +285,10 @@ export class Graph {
   }
 
   /**
-   * Draws the vertices points and it's tags
+   * Dibuja los vértices del sub-plano solución y sus etiquetas
    * @param {Array<ResultVertex>} vertices
    */
-  drawVertices (vertices = []) {
+  drawVertices(vertices = []) {
     const { ctx, wUnit, hUnit } = this
 
     // Graph point of intersections
@@ -230,88 +309,4 @@ export class Graph {
       )
     })
   }
-}
-
-/**
- * Gets font size in pixels
- * @returns Font size
- */
-function getFontSize () {
-  return Number(
-    window
-      .getComputedStyle(document.body)
-      .getPropertyValue('font-size')
-      .match(/\d+/)[0]
-  )
-}
-
-/**
- * Gets the max values of an object array two properties
- * @param {Array<object>} array
- * @param {string} a
- * @param {string} b
- * @returns An array with the max of two properties of an object array
- */
-function maxMax (array, a, b) {
-  let length = array.length
-  let maxA = array[length - 1][a]
-  let maxB = array[length - 1][b]
-  while (length--) {
-    if (array[length][a] > maxA) {
-      maxA = array[length][a]
-    }
-    if (array[length][b] > maxB) {
-      maxB = array[length][b]
-    }
-  }
-  return [maxA, maxB]
-}
-
-/**
- * Calculates the mid point between two points
- * @param {number} x1
- * @param {number} x2
- * @param {number} y1
- * @param {number} y2
- * @returns Mid point between the points
- */
-function calcMidPoint (x1, x2, y1, y2) {
-  return [(x1 + x2) / 2, (y1 + y2) / 2]
-}
-
-/**
- *
- * @param {number} steps Desired steps
- * @param {number} min Minimum value of the range
- * @param {number} max Maximum value of the range
- * @returns The optimal step size
- */
-function getStepSize (steps, min, max) {
-  const oMin = min
-  const oMax = max
-  const desiredSteps = steps
-  const range = max - min
-
-  // find magnitude and steps in powers of 10
-  const step = range / steps
-  const mag10 = Math.ceil(Math.log(step) / Math.log(10))
-  const baseStepSize = Math.pow(10, mag10)
-
-  const trySteps = [5, 4, 2, 1]
-  let stepSize
-
-  for (let i = 0; i < trySteps.length; i++) {
-    stepSize = baseStepSize / trySteps[i]
-    const ns = Math.round(range / stepSize)
-    // bail if anything didn't work, We can't check float.ZeroTolernace anywhere since we should
-    // work on arbitrary range values
-    if (isNaN(baseStepSize) || isNaN(ns) || ns < 1) return
-
-    min = Math.floor(oMin / stepSize) * stepSize
-    max = Math.ceil(oMax / stepSize) * stepSize
-    steps = parseInt(Math.round((max - min) / stepSize))
-
-    if (steps <= desiredSteps) break
-  }
-  return stepSize
 }
